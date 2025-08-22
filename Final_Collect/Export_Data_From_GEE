@@ -1,0 +1,329 @@
+import ee
+import geemap
+import pandas as pd
+from datetime import datetime
+import os
+
+# Configuration
+PROJECT_ID = 'forest-health-morocco'
+EXPORT_FOLDER = 'forest_health_data'
+
+class ForestHealthDataExtractor:
+    def __init__(self, project_id):
+        """
+        Initialise Google Earth Engine avec votre projet
+        """
+        try:
+            ee.Initialize(project=project_id)
+            print(f"GEE initialisé avec le projet: {project_id}")
+        except:
+            ee.Authenticate()
+            ee.Initialize(project=project_id)
+            print("GEE authentifié et initialisé")
+
+    def define_morocco_forests(self):
+        """
+        Définit les régions forestières principales du Maroc
+        """
+        # Coordonnées des principales forêts marocaines
+        forest_regions = {
+            'rif': ee.Geometry.Rectangle([-5.5, 34.5, -4.0, 35.5]),
+            'moyen_atlas': ee.Geometry.Rectangle([-5.5, 33.0, -4.0, 34.0]),
+            'haut_atlas': ee.Geometry.Rectangle([-8.0, 30.5, -5.0, 32.0]),
+            'mamora': ee.Geometry.Rectangle([-6.7, 34.0, -6.2, 34.3]),
+            'argan': ee.Geometry.Rectangle([-9.5, 30.0, -8.0, 31.0])
+        }
+        return forest_regions
+
+    def get_sentinel2_imagery(self, roi, start_date, end_date):
+        """
+        Récupère les images Sentinel-2 avec peu de nuages
+        """
+        collection = (ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                     .filterBounds(roi)
+                     .filterDate(start_date, end_date)
+                     .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20))
+                     .select(['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B11', 'B12']))
+
+        # Image composite médiane
+        composite = collection.median().clip(roi)
+
+        # CORRECTION: Convertir en Float32 pour éviter les conflits de types
+        return composite.toFloat()
+
+    def calculate_vegetation_indices(self, image):
+        """
+        Calcule les indices de végétation importants pour la santé forestière
+        """
+        # NDVI (Normalized Difference Vegetation Index)
+        ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI').toFloat()
+
+        # EVI (Enhanced Vegetation Index)
+        evi = image.expression(
+            '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))',
+            {
+                'NIR': image.select('B8'),
+                'RED': image.select('B4'),
+                'BLUE': image.select('B2')
+            }
+        ).rename('EVI').toFloat()
+
+        # NDMI (Normalized Difference Moisture Index) - stress hydrique
+        ndmi = image.normalizedDifference(['B8', 'B11']).rename('NDMI').toFloat()
+
+        # NBR (Normalized Burn Ratio) - détection des zones brûlées
+        nbr = image.normalizedDifference(['B8', 'B12']).rename('NBR').toFloat()
+
+        # GNDVI (Green NDVI) - santé de la chlorophylle
+        gndvi = image.normalizedDifference(['B8', 'B3']).rename('GNDVI').toFloat()
+
+        return image.addBands([ndvi, evi, ndmi, nbr, gndvi])
+
+    def get_climate_data(self, roi, start_date, end_date):
+        """
+        Récupère les données climatiques (température, précipitations)
+        """
+        # Température (ERA5) - CORRECTION: Convertir en Float32
+        temperature = (ee.ImageCollection('ECMWF/ERA5/DAILY')
+                      .filterBounds(roi)
+                      .filterDate(start_date, end_date)
+                      .select(['mean_2m_air_temperature'])
+                      .mean()
+                      .clip(roi)
+                      .toFloat())
+
+        # Précipitations (CHIRPS) - CORRECTION: Convertir en Float32
+        precipitation = (ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+                        .filterBounds(roi)
+                        .filterDate(start_date, end_date)
+                        .select(['precipitation'])
+                        .sum()
+                        .clip(roi)
+                        .toFloat())
+
+        return temperature, precipitation
+
+    def get_landsat8_timeseries(self, roi, start_year=2020, end_year=2024):
+        """
+        Récupère une série temporelle Landsat 8 (années spécifiées)
+        """
+        yearly_composites = []
+
+        for year in range(start_year, end_year + 1):
+            start = f'{year}-01-01'
+            end = f'{year}-12-31'
+
+            collection = (ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+                         .filterBounds(roi)
+                         .filterDate(start, end)
+                         .filter(ee.Filter.lt('CLOUD_COVER', 30)))
+
+            # Scaling des bandes
+            def scale_landsat(image):
+                optical = image.select('SR_B.').multiply(0.0000275).add(-0.2)
+                thermal = image.select('ST_B.*').multiply(0.00341802).add(149.0)
+                return image.addBands(optical, overwrite=True).addBands(thermal, overwrite=True)
+
+            scaled = collection.map(scale_landsat)
+            composite = scaled.median().clip(roi)
+
+            # Calcul NDVI - CORRECTION: Convertir en Float32
+            ndvi = composite.normalizedDifference(['SR_B5', 'SR_B4']).rename(f'NDVI_{year}').toFloat()
+            yearly_composites.append(ndvi)
+
+        return ee.Image.cat(yearly_composites)
+
+    def export_to_drive(self, image, description, folder, region, scale=30):
+        """
+        Export optimisé vers Google Drive
+        """
+        task = ee.batch.Export.image.toDrive(
+            image=image,
+            description=description,
+            folder=folder,
+            region=region,
+            scale=scale,
+            maxPixels=1e9,
+            fileFormat='GeoTIFF',
+            formatOptions={
+                'cloudOptimized': True
+            }
+        )
+
+        task.start()
+        print(f"Export lancé: {description}")
+        print(f"Vérifiez dans Google Drive > {folder}")
+
+        return task
+
+    def create_forest_health_dataset(self, region_name, roi):
+        """
+        Crée un dataset principal sans série temporelle (pour éviter surcharge mémoire)
+        """
+        print(f"\nTraitement de la région: {region_name}")
+
+        # Dates pour l'analyse
+        start_date = '2024-03-01'
+        end_date = '2024-10-31'
+
+        # 1. Images Sentinel-2 avec indices
+        print("Récupération Sentinel-2...")
+        sentinel = self.get_sentinel2_imagery(roi, start_date, end_date)
+        sentinel_with_indices = self.calculate_vegetation_indices(sentinel)
+
+        # 2. Données climatiques
+        print("Récupération données climatiques...")
+        temp, precip = self.get_climate_data(roi, start_date, end_date)
+
+        # 3. Données topographiques (élévation, pente) - CORRECTION: Convertir en Float32
+        print("Ajout données topographiques...")
+        elevation = ee.Image('USGS/SRTMGL1_003').select('elevation').clip(roi).toFloat()
+        slope = ee.Terrain.slope(elevation).toFloat()
+        aspect = ee.Terrain.aspect(elevation).toFloat()
+
+        # CORRECTION: Dataset principal sans série temporelle pour éviter surcharge mémoire
+        forest_health_image = (sentinel_with_indices
+                              .addBands(temp.rename('temperature'))
+                              .addBands(precip.rename('precipitation'))
+                              .addBands(elevation)
+                              .addBands(slope)
+                              .addBands(aspect))
+
+        return forest_health_image
+
+    def create_timeseries_dataset(self, region_name, roi):
+        """
+        Crée un dataset séparé pour la série temporelle
+        """
+        print(f"Création série temporelle pour {region_name}...")
+        timeseries = self.get_landsat8_timeseries(roi)
+        return timeseries
+
+    def generate_sample_points(self, roi, n_points=500):
+        """
+        Génère des points d'échantillonnage
+        """
+        points = ee.FeatureCollection.randomPoints(
+            region=roi,
+            points=n_points,
+            seed=42
+        )
+
+        return points
+
+# ============= UTILISATION =============
+
+def main():
+    # Initialisation
+    extractor = ForestHealthDataExtractor(PROJECT_ID)
+
+    # Définir les régions forestières
+    forests = extractor.define_morocco_forests()
+
+    # Traiter chaque région forestière
+    export_tasks = []
+
+    for forest_name, forest_roi in forests.items():
+        print("\n" + "="*50)
+        print(f"Traitement: {forest_name}")
+        print("="*50)
+
+        # CORRECTION: Créer le dataset principal (sans série temporelle)
+        forest_data = extractor.create_forest_health_dataset(forest_name, forest_roi)
+
+        # CORRECTION: Export principal
+        task1 = extractor.export_to_drive(
+            image=forest_data,
+            description=f'forest_health_{forest_name}_2024',
+            folder=EXPORT_FOLDER,
+            region=forest_roi.getInfo()['coordinates'],
+            scale=30
+        )
+        export_tasks.append(task1)
+
+        # CORRECTION: Export séparé pour la série temporelle
+        timeseries_data = extractor.create_timeseries_dataset(forest_name, forest_roi)
+        task2 = extractor.export_to_drive(
+            image=timeseries_data,
+            description=f'timeseries_{forest_name}_2020_2024',
+            folder=EXPORT_FOLDER,
+            region=forest_roi.getInfo()['coordinates'],
+            scale=30
+        )
+        export_tasks.append(task2)
+
+        # Générer des points d'échantillonnage
+        sample_points = extractor.generate_sample_points(forest_roi, n_points=500)
+
+        # CORRECTION: Extraire les valeurs aux points (dataset principal seulement)
+        samples = forest_data.sampleRegions(
+            collection=sample_points,
+            scale=30,
+            geometries=True
+        )
+
+        # Exporter les échantillons en CSV
+        sample_task = ee.batch.Export.table.toDrive(
+            collection=samples,
+            description=f'samples_{forest_name}_2024',
+            folder=EXPORT_FOLDER,
+            fileFormat='CSV'
+        )
+        sample_task.start()
+        print(f"Export échantillons CSV: samples_{forest_name}_2024.csv")
+
+        # CORRECTION: Échantillons pour série temporelle
+        timeseries_samples = timeseries_data.sampleRegions(
+            collection=sample_points,
+            scale=30,
+            geometries=True
+        )
+
+        timeseries_sample_task = ee.batch.Export.table.toDrive(
+            collection=timeseries_samples,
+            description=f'timeseries_samples_{forest_name}_2024',
+            folder=EXPORT_FOLDER,
+            fileFormat='CSV'
+        )
+        timeseries_sample_task.start()
+        print(f"Export série temporelle CSV: timeseries_samples_{forest_name}_2024.csv")
+
+    print("\nTous les exports ont été lancés")
+    print("Les fichiers seront disponibles dans Google Drive > " + EXPORT_FOLDER)
+    print("\nFichiers attendus par région:")
+    for forest_name in forests.keys():
+        print(f"  • {forest_name}:")
+        print(f"    - forest_health_{forest_name}_2024.tif")
+        print(f"    - timeseries_{forest_name}_2020_2024.tif")
+        print(f"    - samples_{forest_name}_2024.csv")
+        print(f"    - timeseries_samples_{forest_name}_2024.csv")
+
+    print("\nMonitoring des tâches:")
+    print("   Visitez: https://code.earthengine.google.com/tasks")
+
+    # Optionnel: Visualisation avec geemap
+    print("\nCréation d'une carte interactive...")
+    Map = geemap.Map(center=[32.0, -6.0], zoom=6)
+
+    # Ajouter les régions forestières
+    for name, roi in forests.items():
+        Map.addLayer(roi, {'color': 'green'}, name)
+
+    # Ajouter un exemple d'image NDVI
+    example_roi = forests['moyen_atlas']
+    example_image = extractor.get_sentinel2_imagery(
+        example_roi, '2024-06-01', '2024-08-31'
+    )
+    ndvi = example_image.normalizedDifference(['B8', 'B4'])
+
+    Map.addLayer(
+        ndvi,
+        {'min': 0, 'max': 1, 'palette': ['red', 'yellow', 'green']},
+        'NDVI Moyen Atlas'
+    )
+
+    Map.save('morocco_forests_map.html')
+    print("Carte sauvegardée: morocco_forests_map.html")
+
+if __name__ == "__main__":
+    main()
