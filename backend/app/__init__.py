@@ -1,0 +1,60 @@
+from flask import Flask, render_template
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_cors import CORS
+
+db = SQLAlchemy()
+migrate = Migrate()
+login_manager = LoginManager()
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object("config.Config")
+
+    # Initialiser les extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
+    CORS(app)
+
+    # Définir login par défaut
+    login_manager.login_view = 'auth.login'  
+    login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
+    login_manager.login_message_category = 'warning'
+
+    
+    # Importer les blueprints 
+    from app.routes.auth import auth_bp
+    from app.routes.admin import admin_bp
+    app.register_blueprint(auth_bp, url_prefix="/auth")
+    app.register_blueprint(admin_bp)
+
+    
+    from app.models.user import User
+    from app.models.roles import Role
+    from app.models.associations import user_roles
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # Créer des utilisateurs initiaux
+    with app.app_context():
+        if User.query.count() == 0:
+            admin = User(email="admin@forest.com", role="admin", telephone="+123456789")
+            admin.set_password("admin123")
+
+            agent = User(email="agent@forest.com", role="agent forestier", telephone="+123456725")
+            agent.set_password("agent123")
+
+            chercheur = User(email="chercheur@forest.com", role="chercheur", telephone="+123256789")
+            chercheur.set_password("chercheur123")
+
+            db.session.add_all([admin, agent, chercheur])
+            db.session.commit()
+
+        from app.services.role_service import RoleService
+        RoleService.initialize_default_roles()
+
+    return app
