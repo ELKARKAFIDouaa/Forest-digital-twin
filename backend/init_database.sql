@@ -89,3 +89,24 @@ CREATE TABLE zones (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- Table capteurs
+CREATE TABLE sensors (
+    id SERIAL PRIMARY KEY,
+    sensor_id VARCHAR(100) UNIQUE NOT NULL,
+    category VARCHAR(50),
+    metric VARCHAR(100),
+    unit VARCHAR(20),
+    min_value FLOAT,
+    max_value FLOAT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table données reçues
+CREATE TABLE iot_data (
+    id SERIAL PRIMARY KEY,
+    sensor_id VARCHAR(100) REFERENCES sensors(sensor_id) ON DELETE CASCADE,
+    value FLOAT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

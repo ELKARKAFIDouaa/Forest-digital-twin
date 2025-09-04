@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -12,25 +12,27 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    # Initialiser les extensions
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     CORS(app)
 
-    # Définir login par défaut
-    login_manager.login_view = 'auth.login'  
+    # Default login settings
+    login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
     login_manager.login_message_category = 'warning'
 
-    
-    # Importer les blueprints 
+    # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.admin import admin_bp
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp)
 
-    
+    from app.routes.sensors import sensors_bp
+    app.register_blueprint(sensors_bp, url_prefix="/api")
+
+    # Import models
     from app.models.user import User
     from app.models.roles import Role
     from app.models.associations import user_roles
@@ -38,9 +40,14 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    
+    from app.services.role_service import RoleService
 
-    # Créer des utilisateurs initiaux
+    # Create tables and initial users
     with app.app_context():
+        db.create_all()  # Ensure all tables exist
+
+        # Add initial users if none exist
         if User.query.count() == 0:
             admin = User(email="admin@forest.com", role="admin", telephone="+123456789")
             admin.set_password("admin123")
@@ -54,7 +61,12 @@ def create_app():
             db.session.add_all([admin, agent, chercheur])
             db.session.commit()
 
-        from app.services.role_service import RoleService
+            
         RoleService.initialize_default_roles()
+
+        @app.route("/")
+        def home():
+            return "Welcome to Forest Digital Twin API"
+
 
     return app
