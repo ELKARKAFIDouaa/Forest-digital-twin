@@ -1,5 +1,5 @@
 import React from 'react';
-import { DivideIcon as LucideIcon } from 'lucide-react';
+import { LucideIcon as LucideIconType } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
@@ -8,7 +8,7 @@ interface StatsCardProps {
     value: number;
     type: 'increase' | 'decrease';
   };
-  icon: LucideIcon;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; // <-- fix here
   color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Scissors as Sensors, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
+import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
@@ -9,8 +9,8 @@ const Sidebar: React.FC = () => {
 
   const navigationItems = [
     { path: '/DigitalTwin', icon: TreePine, label: 'Digital Twin' },
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-    { path: '/sensors', icon: Sensors, label: 'Capteurs' },
+    { path: '/dashboard', icon: Gauge, label: 'Tableau de bord' },
+    { path: '/sensors', icon: Activity, label: 'Capteurs' },
     { path: '/reports', icon: FileText, label: 'Rapports' },
     { path: '/users', icon: Users, label: 'Utilisateurs' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
