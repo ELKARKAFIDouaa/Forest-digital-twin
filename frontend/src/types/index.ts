@@ -2,12 +2,18 @@
 export interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'user' | 'viewer';
+  firstname: string;
+  lastname: string;
+  telephone: string;
+  roles: string[];
+  permissions: string[];
   avatar?: string;
   createdAt: string;
+  token?: string;
 }
+
+
+
 
 export interface Sensor {
   id: string;
@@ -51,18 +57,20 @@ export interface DashboardStats {
   lastUpdate: string;
 }
 
+export interface RegisterData {
+  telephone: string;
+  email: string;
+  firstname: string;
+  lastname: string;
+  password: string;
+}
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  register: (userData: RegisterData) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  logout: () => Promise<void>;
+  register: (userData: RegisterData) => Promise<User>;
   resetPassword: (email: string) => Promise<void>;
   isLoading: boolean;
-}
-
-export interface RegisterData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
+  hasRole: (role: string) => boolean;
+  hasPermission: (permission: string) => boolean;
 }

@@ -1,36 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { DashboardStats } from '../types';
-import StatsCard from '../components/Dashboard/StatsCard';
 import EnvironmentalChart from '../components/Dashboard/EnvironmentalChart';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import * as dashboardAPI from '../services/dashboardAPI';
-import { TrendingUp, TrendingDown, AlertCircle, Activity } from 'lucide-react';
 
-const REFRESH_INTERVAL = 5000; // 5 seconds
+const REFRESH_INTERVAL = 5000; // 5 secondes
 
 const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [environmentalData, setEnvironmentalData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const [statsData, envData] = await Promise.all([
-        dashboardAPI.getDashboardStats(),
-        dashboardAPI.getEnvironmentalData(),
-      ]);
-      setStats(statsData);
+      const envData = await dashboardAPI.getEnvironmentalData();
       setEnvironmentalData(envData);
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error('Échec du chargement des données environnementales:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(); // initial fetch
-    const interval = setInterval(fetchData, REFRESH_INTERVAL); // real-time updates
+    fetchData(); // premier fetch
+    const interval = setInterval(fetchData, REFRESH_INTERVAL); // mises à jour en temps réel
     return () => clearInterval(interval);
   }, []);
 
@@ -38,20 +30,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Tableau de bord</h1>
+      {/* Barre supérieure */}
+      <h1 className="text-3xl font-bold">Tableau de bord - Données environnementales</h1>
 
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard title="Capteurs totaux" value={stats.totalSensors} icon={Activity} color="blue" />
-          <StatsCard title="Capteurs actifs" value={stats.activeSensors} icon={TrendingUp} color="green" />
-          <StatsCard title="Alertes critiques" value={stats.criticalAlerts} icon={AlertCircle} color="red" />
-          <StatsCard title="Points de données" value={stats.dataPoints.toLocaleString()} icon={TrendingUp} color="purple" />
-</div>
-        
-      )}
-
-      {/* Environmental Charts */}
+      {/* Graphiques */}
       {environmentalData && (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           <EnvironmentalChart title="Température" data={environmentalData.temperature} unit="°C" color="red" />

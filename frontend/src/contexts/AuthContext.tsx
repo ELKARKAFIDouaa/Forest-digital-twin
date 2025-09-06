@@ -1,5 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthContextType, RegisterData } from '../types';
+import { User, RegisterData, AuthContextType  } from '../types';
 import * as authAPI from '../services/authAPI';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,7 +22,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session on app load
     const checkAuth = async () => {
       try {
         const userData = await authAPI.getCurrentUser();
@@ -37,13 +37,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const userData = await authAPI.login(email, password);
-      setUser(userData);
-    } finally {
-      setIsLoading(false);
+  setIsLoading(true);
+  try {
+    const userData = await authAPI.login(email, password);
+    setUser(userData);
+    return userData; // ← Ajoutez ce return
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error; // ← Propagez l'erreur
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  const hasRole = (role: string) => {
+    return Array.isArray(user?.roles) ? user.roles.includes(role) : user?.roles === role;
+  };
+
+  const hasPermission = (permission: string) => {
+    if (!user?.permissions) return false;
+    if (Array.isArray(user.permissions)) {
+      return user.permissions.includes(permission);
+    } else if (typeof user.permissions === 'string') {
+      return user.permissions === 'all' || user.permissions === permission;
     }
+    return false;
   };
 
   const logout = async () => {
@@ -55,11 +73,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const register = async (userData: RegisterData) => {
+  const register = async (userData: RegisterData): Promise<User> => {
     setIsLoading(true);
     try {
       const newUser = await authAPI.register(userData);
       setUser(newUser);
+      return newUser; // ← Ajoutez ce return
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error; // ← Propagez l'erreur
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     register,
     resetPassword,
     isLoading,
+    hasRole,
+    hasPermission,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

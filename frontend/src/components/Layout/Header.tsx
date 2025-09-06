@@ -35,9 +35,9 @@ const Header: React.FC = () => {
             </div>
             <div className="hidden md:block">
               <p className="text-sm font-medium text-gray-900">
-                {user?.firstName} {user?.lastName}
+                {user?.firstname} {user?.lastname}
               </p>
-              <p className="text-xs text-gray-500">{user?.role}</p>
+              <p className="text-xs text-gray-500">{user?.roles}</p>
             </div>
           </div>
         </div>

@@ -1,20 +1,25 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
+import { LayoutDashboard, Scissors as Sensors, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user, hasRole } = useAuth();
 
+  // Navigation par défaut
   const navigationItems = [
     { path: '/DigitalTwin', icon: TreePine, label: 'Digital Twin' },
-    { path: '/dashboard', icon: Gauge, label: 'Tableau de bord' },
-    { path: '/sensors', icon: Activity, label: 'Capteurs' },
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
     { path: '/reports', icon: FileText, label: 'Rapports' },
-    { path: '/users', icon: Users, label: 'Utilisateurs' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
+
+  // ✅ Ajout conditionnel si admin
+  if (hasRole('admin')) {
+    navigationItems.splice(2, 0, { path: '/sensors', icon: Sensors, label: 'Capteurs' });
+    navigationItems.splice(3, 0, { path: '/users', icon: Users, label: 'Utilisateurs' });
+  }
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">

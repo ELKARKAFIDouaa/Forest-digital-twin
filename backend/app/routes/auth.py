@@ -1,12 +1,14 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.services.auth_service import AuthService
 
 auth_bp = Blueprint("auth", __name__)
 
-# 🔹 Inscription
-@auth_bp.route("/signup", methods=["POST"])
-def signup():
+@auth_bp.route("/register", methods=["POST"])
+def register():
     data = request.get_json()
+    firstname = data.get("firstname")
+    lastname = data.get("lastname")
     email = data.get("email")
     telephone = data.get("telephone")
     password = data.get("password")
@@ -14,14 +16,27 @@ def signup():
     if not email or not password:
         return jsonify({"error": "Email et mot de passe requis"}), 400
 
-    user, error = AuthService.register(email, telephone, password, role="user")
+    user, error = AuthService.register(email, firstname, lastname, telephone, password, role="user")
     if error:
         return jsonify({"error": error}), 400
 
-    return jsonify({"message": "Utilisateur créé avec succès", "id": user.id}), 201
+    # ✅ Créer un token JWT pour le nouvel utilisateur
+    access_token = create_access_token(identity=user.id)
+    
+    return jsonify({
+        "message": "Utilisateur créé avec succès",
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "telephone": user.telephone,
+            "role": user.role,
+            "created_at": user.created_at.isoformat() if user.created_at else None
+        }
+    }), 201
 
-
-# 🔹 Connexion
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -32,7 +47,37 @@ def login():
     if not user:
         return jsonify({"error": "Identifiants invalides"}), 401
 
+    # ✅ Créer un token JWT
+    access_token = create_access_token(identity=user.id)
     
-    session["user_id"] = user.id
-    return jsonify({"message": "Connexion réussie", "user_id": user.id, "role": user.role})
+    return jsonify({
+        "message": "Connexion réussie",
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "firstname": user.firstname,
+            "lastname": user.lastname,
+            "telephone": user.telephone,
+            "role": user.role,
+            "created_at": user.created_at.isoformat() if user.created_at else None
+        }
+    })
 
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def me():
+    user_id = get_jwt_identity()
+    user = AuthService.get_user_by_id(user_id)
+    if not user:
+        return jsonify({"error": "Utilisateur non trouvé"}), 404
+
+    return jsonify({
+        "id": user.id,
+        "email": user.email,
+        "firstname": user.firstname,
+        "lastname": user.lastname,
+        "telephone": user.telephone,
+        "role": user.role,
+        "created_at": user.created_at.isoformat() if user.created_at else None
+    })

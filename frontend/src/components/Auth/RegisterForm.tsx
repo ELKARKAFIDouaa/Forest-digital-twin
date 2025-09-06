@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, TreePine } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: 'Digitaltwin@email.com',
-    firstName: '',
-    lastName: '',
+    email: '',
+    firstname: '',
+    lastname: '',
+    telephone: '',
     password: '',
     confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const { register, isLoading } = useAuth();
+  const navigate = useNavigate(); // 👉 pour redirection
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,38 +25,44 @@ const RegisterForm: React.FC = () => {
       return;
     }
     if (!acceptTerms) {
-      alert('Veuillez accepter les conditions d\'utilisation');
+      alert("Veuillez accepter les conditions d'utilisation");
       return;
     }
 
     try {
       await register({
         email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        telephone: formData.telephone,
         password: formData.password,
       });
+
+      // Si tout est OK
+      setSuccessMessage('Compte créé avec succès ! Redirection vers la connexion...');
+      
+      // Redirection après 2 secondes
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      
     } catch (error) {
       console.error('Registration failed:', error);
+      alert("Erreur lors de l'inscription, veuillez réessayer.");
     }
   };
 
   const handleGoogleSignup = () => {
-    // TODO: Implement Google OAuth
     console.log('Google signup clicked');
   };
 
   return (
     <div className="min-h-screen flex">
       {/* Left side - Branding */}
-      <div className="flex-1 bg-emerald-600 flex flex-col justify-between p-12 text-white">
+      <div className="flex-1 bg-[#68B85B] flex flex-col justify-between p-12 text-white">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-            <TreePine className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Forest</h1>
-            <p className="text-sm opacity-90">Digital Twin</p>
+          <div className="mb-5">
+            <img src="/logo.png" alt="Forest Digital Twin Logo" className="max-w-[150px]" />
           </div>
         </div>
 
@@ -81,15 +90,22 @@ const RegisterForm: React.FC = () => {
               to="/login" 
               className="text-sm text-gray-600 hover:text-gray-900"
             >
-              Nouvel utilisateur ? Créer un compte
+              Déjà inscrit ? Se connecter
             </Link>
           </div>
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Connectez-vous à Digital Twin
+              Inscrivez-vous à Digital Twin
             </h2>
           </div>
+
+          {/* ✅ Message de succès */}
+          {successMessage && (
+            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-center">
+              {successMessage}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Google Sign Up */}
@@ -116,7 +132,7 @@ const RegisterForm: React.FC = () => {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
+                Email
               </label>
               <input
                 id="email"
@@ -130,56 +146,77 @@ const RegisterForm: React.FC = () => {
 
             {/* Name fields */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <input
-                  type="text"
-                  placeholder="Prénom"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  required
-                />
-              </div>
-              <div>
-                <input
-                  type="text"
-                  placeholder="Nom"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  required
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={formData.firstname}
+                onChange={(e) => setFormData({ ...formData, firstname: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Nom"
+                value={formData.lastname}
+                onChange={(e) => setFormData({ ...formData, lastname: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+
+            {/* Telephone */}
+            <div>
+              <label htmlFor="telephone" className="block text-sm font-medium text-gray-700 mb-2">
+                Téléphone
+              </label>
+              <input
+                id="telephone"
+                type="tel"
+                value={formData.telephone}
+                onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
             </div>
 
             {/* Password */}
-            <div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Mot de passe"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Mot de passe"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
 
-            {/* Submit button */}
+            {/* Confirm Password */}
+            <div>
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                required
+              />
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isLoading ? 'Création...' : 'Se connecter'}
+              {isLoading ? 'Inscription...' : "S'inscrire"}
             </button>
           </form>
 
@@ -193,15 +230,14 @@ const RegisterForm: React.FC = () => {
               className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 mt-0.5"
             />
             <label htmlFor="terms" className="text-xs text-gray-600 leading-relaxed">
-              En cliquant sur Créer un compte, j'accepte d'avoir lu et accepte les{' '}
+              En cliquant sur Créer un compte, j'accepte les{' '}
               <Link to="/terms" className="text-emerald-600 hover:underline">
                 Conditions d'utilisation
               </Link>{' '}
-              et de{' '}
+              et la{' '}
               <Link to="/privacy" className="text-emerald-600 hover:underline">
-                confidentialité
-              </Link>
-              .
+                Politique de confidentialité
+              </Link>.
             </label>
           </div>
         </div>

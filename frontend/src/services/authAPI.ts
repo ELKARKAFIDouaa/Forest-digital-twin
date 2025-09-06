@@ -1,53 +1,133 @@
 import { User, RegisterData } from '../types';
 
-// Use Vite environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Simulated API calls - replace with actual Flask backend endpoints
 export const login = async (email: string, password: string): Promise<User> => {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  console.log('🔐 Attempting login to:', `${API_BASE_URL}/auth/login`);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Login failed');
+    console.log('📡 Login response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Login error response:', errorText);
+      throw new Error(errorText || 'Login failed');
+    }
+
+    const data = await response.json();
+    console.log('✅ Login success data:', data);
+
+    const token = data.access_token;
+    if (!token) {
+      throw new Error('No token received from server');
+    }
+
+    localStorage.setItem('token', token);
+
+    // ✅ Correction: Utilisez la structure correcte
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      firstname: data.user.firstname,
+      lastname: data.user.lastname,
+      telephone: data.user.telephone || '',
+      roles: [data.user.role], // Convertir en tableau
+      permissions: ['standard'],
+      createdAt: data.user.created_at || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('💥 Login fetch error:', error);
+    throw error;
   }
-
-  return {
-    id: '1',
-    email,
-    firstName: 'John',
-    lastName: 'Doe',
-    role: 'admin',
-    createdAt: new Date().toISOString(),
-  };
 };
 
 export const register = async (userData: RegisterData): Promise<User> => {
-  const response = await fetch(`${API_BASE_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
 
-  if (!response.ok) {
-    throw new Error('Registration failed');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || error.error || 'Registration failed');
+    }
+
+    const data = await response.json();
+    const token = data.access_token;
+
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+
+    // ✅ Correction: Utilisez la structure correcte
+    return {
+      id: data.user.id,
+      email: data.user.email,
+      firstname: data.user.firstname,
+      lastname: data.user.lastname,
+      telephone: data.user.telephone || '',
+      roles: [data.user.role], // Convertir en tableau
+      permissions: ['standard'],
+      createdAt: data.user.created_at || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('No authentication token found');
   }
 
-  return {
-    id: '1',
-    email: userData.email,
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    role: 'user',
-    createdAt: new Date().toISOString(),
-  };
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        throw new Error('Session expired');
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // ✅ Correction: Utilisez la structure correcte
+    return {
+      id: data.id,
+      email: data.email,
+      firstname: data.firstname || '',
+      lastname: data.lastname || '',
+      telephone: data.telephone || '',
+      roles: [data.role], // Convertir en tableau
+      permissions: ['standard'],
+      createdAt: data.created_at || new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    throw error;
+  }
 };
 
 export const logout = async (): Promise<void> => {
@@ -56,19 +136,6 @@ export const logout = async (): Promise<void> => {
   });
 };
 
-export const getCurrentUser = async (): Promise<User> => {
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Not authenticated');
-  }
-
-  return response.json();
-};
 
 export const resetPassword = async (email: string): Promise<void> => {
   await fetch(`${API_BASE_URL}/auth/reset-password`, {
@@ -79,3 +146,4 @@ export const resetPassword = async (email: string): Promise<void> => {
     body: JSON.stringify({ email }),
   });
 };
+

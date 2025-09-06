@@ -10,6 +10,8 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    firstname = db.Column(db.String(120), unique=True, nullable=False)
+    lastname = db.Column(db.String(120), unique=True, nullable=False)
     telephone = db.Column(db.String(15), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), default="agent")  
@@ -48,4 +50,4 @@ class User(db.Model):
             self.roles.remove(role_to_remove)
     
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.email}>'
