@@ -1,0 +1,4 @@
+location_id,region,NDVI_2020,NDVI_2021,NDVI_2022,NDVI_2023
+forest_001,COMBINED,0.65,0.68,0.62,0.7
+forest_002,argan,0.6,0.63,0.58,0.65
+forest_003,haut_atlas,0.75,0.78,0.72,0.76

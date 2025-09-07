@@ -1,0 +1,32 @@
+{
+    "training_date": "2025-09-01 21:12:29",
+    "approach": "Combined Regions Analysis",
+    "regions": [
+        "argan",
+        "haut",
+        "mamora",
+        "moyen",
+        "rif"
+    ],
+    "combined_data_points": 11985,
+    "models_tested": [
+        "ARIMA",
+        "SARIMA",
+        "ExpSmoothing",
+        "Prophet"
+    ],
+    "best_models": {
+        "argan": "Prophet",
+        "haut": "ExpSmoothing",
+        "mamora": "ARIMA",
+        "moyen": "ExpSmoothing",
+        "rif": "SARIMA",
+        "COMBINED": "Prophet"
+    },
+    "time_period": "2020-2024",
+    "prediction_horizon": "1-2 years",
+    "best_overall_model": "SARIMA",
+    "best_combined_model": "Prophet",
+    "total_locations": 2397,
+    "analysis_type": "Individual + Combined Regions"
+}

@@ -1,0 +1,31 @@
+{
+  "training_date": "2025-09-05T22:54:36.362634",
+  "approach": "Combined Regional Models",
+  "regions": [
+    "COMBINED",
+    "argan",
+    "haut_atlas",
+    "mamora",
+    "moyen_atlas",
+    "rif"
+  ],
+  "best_models": {
+    "COMBINED": "XGBoost",
+    "argan": "LightGBM",
+    "haut_atlas": "Prophet",
+    "mamora": "RandomForest",
+    "moyen_atlas": "GradientBoosting",
+    "rif": "XGBoost"
+  },
+  "n_steps": 3,
+  "features": [
+    "lag_1",
+    "lag_2",
+    "lag_3",
+    "rolling_mean_3",
+    "rolling_std_3",
+    "rolling_min_3",
+    "rolling_max_3"
+  ],
+  "model_version": "1.0"
+}

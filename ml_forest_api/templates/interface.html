@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction Forestière - Interface ML</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="0.8" fill="rgba(255,255,255,0.08)"/><circle cx="40" cy="80" r="1.2" fill="rgba(255,255,255,0.06)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+            z-index: -1;
+        }
+        
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ffffff, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .header p {
+            font-size: 1.4em;
+            opacity: 0.9;
+            font-weight: 300;
+            margin-bottom: 25px;
+        }
+        
+        .status-container {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.2);
+            padding: 12px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .status-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .container {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .container:hover::before {
+            left: 100%;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 40px;
+            background: rgba(102,126,234,0.1);
+            border-radius: 20px;
+            padding: 8px;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 18px 30px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            color: #667eea;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tab:hover {
+            background: rgba(102,126,234,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+            transform: translateY(-3px);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .tab-content h2 {
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+        
+        .form-section {
+            background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05));
+            border: 2px solid rgba(102,126,234,0.2);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .form-section:hover {
+            border-color: rgba(102,126,234,0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102,126,234,0.1);
+        }
+        
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .form-section h3 {
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            color: #667eea;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .form-field {
+            position: relative;
+        }
+        
+        .form-field label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #4a5568;
+            font-size: 0.95em;
+            display: block;
+            transition: color 0.3s ease;
+        }
+        
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-field input:focus,
+        .form-field select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            background: rgba(255,255,255,1);
+            transform: translateY(-2px);
+        }
+        
+        .form-field input:focus + label,
+        .form-field select:focus + label {
+            color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 35px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px 8px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.3);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 45px rgba(102,126,234,0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            box-shadow: 0 8px 25px rgba(79,195,247,0.3);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 15px 45px rgba(79,195,247,0.4);
+        }
+        
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result {
+            margin-top: 40px;
+            padding: 35px;
+            border-radius: 20px;
+            display: none;
+            animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result.success {
+            background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(129,199,132,0.1));
+            border: 2px solid rgba(76,175,80,0.3);
+            backdrop-filter: blur(20px);
+        }
+        
+        .result.error {
+            background: linear-gradient(135deg, rgba(244,67,54,0.1), rgba(239,83,80,0.1));
+            border: 2px solid rgba(244,67,54,0.3);
+            backdrop-filter: blur(20px);
+        }
+        
+        @keyframes slideInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .prediction-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 25px 0;
+            box-shadow: 0 20px 60px rgba(102,126,234,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            animation: sparkle 4s linear infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: translateX(-50%) translateY(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) translateY(-50%) rotate(360deg); }
+        }
+        
+        .prediction-card h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin: 40px 0;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        
+        .file-upload {
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            margin: 30px 0;
+            background: linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05));
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .file-upload::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(102,126,234,0.1);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        .file-upload:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+        
+        .file-upload:hover {
+            border-color: #764ba2;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(102,126,234,0.2);
+        }
+        
+        .file-upload-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #667eea;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .info-note {
+            background: linear-gradient(135deg, rgba(79,195,247,0.1), rgba(41,182,246,0.1));
+            border-left: 4px solid #4fc3f7;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 15px;
+            font-size: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 12px;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-indicator.online { 
+            background: #4caf50; 
+            box-shadow: 0 0 10px rgba(76,175,80,0.5);
+        }
+        .status-indicator.offline { 
+            background: #f44336; 
+            box-shadow: 0 0 10px rgba(244,67,54,0.5);
+        }
+        .status-indicator.warning { 
+            background: #ff9800; 
+            box-shadow: 0 0 10px rgba(255,152,0,0.5);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(20px);
+        }
+        
+        table thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(102,126,234,0.1);
+        }
+        
+        table tbody tr:hover {
+            background: rgba(102,126,234,0.05);
+        }
+        
+        /* Button Container */
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .main-container { padding: 15px; }
+            .header { padding: 30px; }
+            .header h1 { font-size: 2.8em; }
+            .container { padding: 30px; }
+            .form-row { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        }
+        
+        @media (max-width: 768px) {
+            .main-container { padding: 10px; }
+            .header { padding: 25px; }
+            .header h1 { font-size: 2.2em; }
+            .header p { font-size: 1.1em; }
+            .container { padding: 25px; }
+            .form-row { grid-template-columns: 1fr; gap: 20px; }
+            .tabs { 
+                flex-direction: column; 
+                padding: 5px;
+            }
+            .tab { 
+                margin: 3px 0; 
+                border-radius: 10px; 
+            }
+            .btn {
+                padding: 15px 25px;
+                font-size: 14px;
+                margin: 8px 5px;
+            }
+            .tab-content h2 {
+                font-size: 1.8em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.8em; }
+            .header p { font-size: 1em; }
+            .form-section { padding: 25px; }
+            .file-upload { padding: 30px; }
+            .file-upload-icon { font-size: 3em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>🌲 Prédiction Forestière</h1>
+            <p>Intelligence Artificielle pour l'Analyse des Écosystèmes Forestiers Marocains</p>
+            <div class="status-container">
+                <span class="status-indicator" id="apiStatus"></span>
+                <span id="apiStatusText">Vérification du système...</span>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('classification')">🔍 Classification Forestière</div>
+                <div class="tab" onclick="switchTab('timeseries')">📈 Séries Temporelles</div>
+                <div class="tab" onclick="switchTab('upload')">📁 Analyse CSV</div>
+            </div>
+
+            <!-- CLASSIFICATION TAB -->
+            <div id="classification" class="tab-content active">
+                <h2>Classification de la Santé Forestière</h2>
+                
+                <div class="info-note">
+                    <strong>💡 Intelligence Artificielle Avancée:</strong> Cette interface utilise des modèles d'apprentissage automatique 
+                    optimisés pour analyser la santé des forêts marocaines. Les paramètres sont automatiquement calibrés 
+                    selon les caractéristiques de votre écosystème.
+                </div>
+                
+                <form id="classificationForm">
+                    <div id="dynamicClassificationFields">
+                        <!-- Les champs seront générés dynamiquement -->
+                    </div>
+                    
+                    <div class="button-container">
+                        <button type="button" class="btn" onclick="predictClassification()">
+                            🔍 Analyser la Santé Forestière
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="generateRandomData('classification')">
+                            🎲 Données d'Exemple
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadFeatureSchema()">
+                            🔄 Actualiser
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TIMESERIES TAB -->
+            <div id="timeseries" class="tab-content">
+                <h2>Prédiction Évolutive NDVI</h2>
+                
+                <form id="timeseriesForm">
+                    <div class="form-section">
+                        <h3>⚙️ Configuration de l'Analyse Prédictive</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="region">Région d'Analyse</label>
+                                <select id="region" name="region">
+                                    <option value="COMBINED">🌍 Analyse Globale Combinée (Recommandé)</option>
+                                    <option value="argan">🌰 Forêt d'Arganiers</option>
+                                    <option value="haut_atlas">🏔️ Haut Atlas</option>
+                                    <option value="mamora">🌳 Forêt de Mamora</option>
+                                    <option value="moyen_atlas">⛰️ Moyen Atlas</option>
+                                    <option value="rif">🌲 Chaîne du Rif</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="n_periods">Horizon de Prédiction</label>
+                                <select id="n_periods" name="n_periods">
+                                    <option value="1">1 année</option>
+                                    <option value="2" selected>2 années</option>
+                                    <option value="3">3 années</option>
+                                    <option value="5">5 années</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>📊 Données Historiques NDVI</h3>
+                        <p style="color: #718096; margin-bottom: 25px; font-size: 15px;">
+                            Entrez les valeurs NDVI des années précédentes pour alimenter le modèle prédictif. 
+                            Minimum 2 valeurs requises (échelle: 0.0 à 1.0).
+                        </p>
+                        
+                        <div id="ndviInputs">
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>📅 NDVI 2020</label>
+                                    <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.620">
+                                </div>
+                                <div class="form-field">
+                                    <label>📅 NDVI 2021</label>
+                                    <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.650">
+                                </div>
+                                <div class="form-field">
+                                    <label>📅 NDVI 2022</label>
+                                    <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.580">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label>📅 NDVI 2023</label>
+                                    <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.680">
+                                </div>
+                                <div class="form-field">
+                                    <label>📅 NDVI 2024</label>
+                                    <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.640">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="button-container">
+                            <button type="button" class="btn btn-secondary" onclick="addNdviInput()">
+                                ➕ Ajouter Année
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="generateRandomData('timeseries')">
+                                🎲 Générer Données
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="button" class="btn" onclick="predictTimeseries()">
+                            📈 Lancer Prédiction NDVI
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- UPLOAD TAB -->
+            <div id="upload" class="tab-content">
+                <h2>Analyse de Fichiers CSV</h2>
+                
+                <div class="info-note">
+                    <strong>📋 Format de Données:</strong> Votre fichier CSV doit contenir les colonnes correspondant 
+                    aux features de classification ou aux séries NDVI selon le type d'analyse choisi. 
+                    L'interface détectera automatiquement le format optimal.
+                </div>
+                
+                <div class="file-upload" onclick="document.getElementById('csvFile').click()">
+                    <div class="file-upload-icon">📁</div>
+                    <h3>Glissez-Déposez votre Fichier CSV</h3>
+                    <p style="color: #718096; margin: 15px 0;">
+                        ou cliquez pour parcourir vos fichiers
+                    </p>
+                    <p style="color: #a0aec0; font-size: 13px;">
+                        Formats supportés: .csv • Taille max: 16MB
+                    </p>
+                    <input type="file" id="csvFile" accept=".csv" style="display: none;" onchange="handleFileSelect()">
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="uploadType">Type d'Analyse Automatisée</label>
+                            <select id="uploadType">
+                                <option value="classification">🔍 Classification de Santé Forestière</option>
+                                <option value="timeseries">📈 Prédiction Séries Temporelles NDVI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button type="button" class="btn" onclick="uploadAndPredict()" disabled id="uploadBtn">
+                        📤 Lancer l'Analyse Complète
+                    </button>
+                </div>
+            </div>
+
+            <!-- RESULTS SECTION -->
+            <div id="results" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentTab = 'classification';
+        let featureSchema = null;
+        
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Interface de prédiction forestière initialisée');
+            checkApiStatus();
+            loadFeatureSchema();
+        });
+
+        // Gestion des onglets
+        function switchTab(tab) {
+            // Masquer tous les contenus
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            
+            // Afficher le contenu sélectionné
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tab;
+        }
+
+        // Vérification du statut de l'API
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/', { method: 'GET' });
+                const data = await response.json();
+                
+                if (data.status === 'active') {
+                    document.getElementById('apiStatus').className = 'status-indicator online';
+                    document.getElementById('apiStatusText').textContent = 
+                        `Système Opérationnel - ${data.models_loaded.classification + data.models_loaded.timeseries} modèles actifs`;
+                } else {
+                    throw new Error('API inactive');
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').className = 'status-indicator offline';
+                document.getElementById('apiStatusText').textContent = 'Système Déconnecté';
+                console.error('Erreur connexion API:', error);
+            }
+        }
+
+        // Chargement du schéma des features
+        async function loadFeatureSchema() {
+            try {
+                const response = await fetch('/features/schema');
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    featureSchema = result.data.schema;
+                    generateDynamicFields();
+                } else {
+                    console.error('Erreur chargement schema:', result.message);
+                    generateStaticFields();
+                }
+            } catch (error) {
+                console.error('Erreur chargement schema:', error);
+                generateStaticFields();
+            }
+        }
+
+        // Génération dynamique des champs de classification
+        function generateDynamicFields() {
+            const container = document.getElementById('dynamicClassificationFields');
+            if (!featureSchema) {
+                generateStaticFields();
+                return;
+            }
+            
+            let html = '';
+            
+            for (const [category, categoryData] of Object.entries(featureSchema)) {
+                if (categoryData.fields && categoryData.fields.length > 0) {
+                    html += `
+                        <div class="form-section">
+                            <h3>${categoryData.title}</h3>
+                            <div class="form-row">
+                    `;
+                    
+                    categoryData.fields.forEach(field => {
+                        html += `
+                            <div class="form-field">
+                                <label for="${field.name}">${field.description}</label>
+                                <input type="number" 
+                                       id="${field.name}" 
+                                       name="${field.name}"
+                                       min="${field.min}" 
+                                       max="${field.max}" 
+                                       step="${field.step || 0.001}"
+                                       value="${field.default}">
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // Génération des champs statiques (fallback)
+        function generateStaticFields() {
+            const container = document.getElementById('dynamicClassificationFields');
+            container.innerHTML = `
+                <div class="form-section">
+                    <h3>🌿 Indices de Végétation</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="NDVI_2024">NDVI 2024</label>
+                            <input type="number" id="NDVI_2024" name="NDVI_2024" min="-1" max="1" step="0.001" value="0.640">
+                        </div>
+                        <div class="form-field">
+                            <label for="NDVI_2023">NDVI 2023</label>
+                            <input type="number" id="NDVI_2023" name="NDVI_2023" min="-1" max="1" step="0.001" value="0.680">
+                        </div>
+                        <div class="form-field">
+                            <label for="NDVI_2022">NDVI 2022</label>
+                            <input type="number" id="NDVI_2022" name="NDVI_2022" min="-1" max="1" step="0.001" value="0.620">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="NDVI_2021">NDVI 2021</label>
+                            <input type="number" id="NDVI_2021" name="NDVI_2021" min="-1" max="1" step="0.001" value="0.650">
+                        </div>
+                        <div class="form-field">
+                            <label for="NDVI_2020">NDVI 2020</label>
+                            <input type="number" id="NDVI_2020" name="NDVI_2020" min="-1" max="1" step="0.001" value="0.600">
+                        </div>
+                        <div class="form-field">
+                            <label for="EVI_2024">EVI 2024</label>
+                            <input type="number" id="EVI_2024" name="EVI_2024" min="-1" max="1" step="0.001" value="0.400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🌍 Facteurs Environnementaux</h3>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="elevation">Élévation (m)</label>
+                            <input type="number" id="elevation" name="elevation" min="0" max="5000" value="850">
+                        </div>
+                        <div class="form-field">
+                            <label for="slope">Pente (degrés)</label>
+                            <input type="number" id="slope" name="slope" min="0" max="90" value="15">
+                        </div>
+                        <div class="form-field">
+                            <label for="aspect">Aspect (degrés)</label>
+                            <input type="number" id="aspect" name="aspect" min="0" max="360" value="180">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label for="precipitation_sum_2024">Précipitations 2024 (mm)</label>
+                            <input type="number" id="precipitation_sum_2024" name="precipitation_sum_2024" min="0" max="3000" value="800">
+                        </div>
+                        <div class="form-field">
+                            <label for="precipitation_sum_2023">Précipitations 2023 (mm)</label>
+                            <input type="number" id="precipitation_sum_2023" name="precipitation_sum_2023" min="0" max="3000" value="750">
+                        </div>
+                        <div class="form-field">
+                            <label for="temperature_mean_2024">Température moyenne 2024 (°C)</label>
+                            <input type="number" id="temperature_mean_2024" name="temperature_mean_2024" min="-10" max="50" value="20">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Affichage des états de chargement et résultats
+        function showLoading(message = 'Analyse en cours') {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="loading">⏳ ${message}</div>`;
+            resultsDiv.style.display = 'block';
+            resultsDiv.className = 'result';
+        }
+
+        function showResult(data, isError = false) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.className = `result ${isError ? 'error' : 'success'}`;
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = data;
+        }
+
+        // Prédiction de classification
+        async function predictClassification() {
+            showLoading('Classification par Intelligence Artificielle');
+            
+            const form = document.getElementById('classificationForm');
+            const formData = new FormData(form);
+            const features = {};
+            
+            for (let [key, value] of formData.entries()) {
+                features[key] = parseFloat(value) || 0;
+            }
+
+            try {
+                const response = await fetch('/classification/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ features: [features] })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const pred = result.data.predictions[0];
+                    let html = `
+                        <div class="prediction-card">
+                            <h2>🌲 Diagnostic Forestier</h2>
+                            <h3>Classification: ${pred.class_name}</h3>
+                            <div style="font-size: 1.5em; margin: 20px 0;">Niveau de Confiance: ${pred.confidence}%</div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h4>💡 Recommandations d'Expert:</h4>
+                            <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 15px; border-left: 4px solid #667eea;">
+                                ${pred.recommendation}
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (pred.probabilities) {
+                        html += `
+                            <div style="margin-top: 30px;">
+                                <h4>📊 Analyse Probabiliste Détaillée:</h4>
+                                <div style="background: rgba(255,255,255,0.8); padding: 20px; border-radius: 15px;">
+                        `;
+                        
+                        Object.entries(pred.probabilities).forEach(([className, prob]) => {
+                            const percentage = (prob * 100).toFixed(1);
+                            const barWidth = prob * 100;
+                            html += `
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 500;">
+                                        <span>${className}</span>
+                                        <span style="color: #667eea;">${percentage}%</span>
+                                    </div>
+                                    <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                                        <div style="background: ${className === pred.class_name ? 'linear-gradient(90deg, #667eea, #764ba2)' : 'linear-gradient(90deg, #4fc3f7, #29b6f6)'}; height: 100%; width: ${barWidth}%; border-radius: 6px; transition: width 0.8s ease;"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += '</div></div>';
+                    }
+                    
+                    html += `
+                        <div style="margin-top: 25px; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 10px; color: #667eea; text-align: center; font-size: 0.9em;">
+                            Modèle: ${result.data.model_used} • Features: ${result.data.features_used}/${result.data.expected_features} • 
+                            ${new Date(result.data.timestamp).toLocaleString('fr-FR')}
+                        </div>
+                    `;
+                    
+                    showResult(html);
+                } else {
+                    showResult(`Erreur de prédiction: ${result.message}`, true);
+                }
+            } catch (error) {
+                showResult(`Erreur de connexion: ${error.message}`, true);
+            }
+        }
+
+        // Prédiction de séries temporelles  
+        async function predictTimeseries() {
+            showLoading('Génération des prédictions NDVI avancées');
+            
+            const region = document.getElementById('region').value;
+            const n_periods = parseInt(document.getElementById('n_periods').value);
+            
+            const ndviInputs = document.querySelectorAll('#ndviInputs input[name="ndvi_value"]');
+            const ndvi_values = Array.from(ndviInputs)
+                .map(input => parseFloat(input.value))
+                .filter(val => !isNaN(val) && val >= 0 && val <= 1);
+            
+            if (ndvi_values.length < 2) {
+                showResult('⚠️ Au moins 2 valeurs NDVI valides sont requises (échelle 0.0 - 1.0)', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/timeseries/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        region: region,
+                        ndvi_values: ndvi_values,
+                        n_periods: n_periods
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    const summary = data.summary;
+                    
+                    let html = `
+                        <div class="prediction-card">
+                            <h2>📈 Prédictions NDVI Futures</h2>
+                            <h3>${summary.region.replace('_', ' ').toUpperCase()}</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-top: 25px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">NDVI Final Prédit</div>
+                                    <div style="font-size: 2em; font-weight: bold;">${summary.predicted_ndvi}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">État de Santé</div>
+                                    <div style="font-size: 1.4em; font-weight: 600;">${summary.health_status}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">Tendance Évolutive</div>
+                                    <div style="font-size: 1.4em; font-weight: 600;">${summary.trend} ${summary.variation_percent > 0 ? '+' : ''}${summary.variation_percent}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <h4>🔮 Prédictions Détaillées par Période:</h4>
+                            <div style="overflow-x: auto; margin-top: 20px;">
+                                <table style="margin: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center;">Période</th>
+                                            <th style="text-align: center;">NDVI Prédit</th>
+                                            <th style="text-align: center;">Statut Santé</th>
+                                            <th style="text-align: center;">Score Santé</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    data.predictions.forEach((pred, index) => {
+                        html += `
+                            <tr>
+                                <td style="text-align: center; font-weight: 600;">${pred.date}</td>
+                                <td style="text-align: center; font-weight: bold; color: #667eea;">${pred.predicted_ndvi}</td>
+                                <td style="text-align: center;">${pred.health_icon} ${pred.health_status}</td>
+                                <td style="text-align: center;">
+                                    <span style="padding: 5px 12px; background: ${pred.health_level > 3 ? 'linear-gradient(90deg, #4caf50, #66bb6a)' : pred.health_level > 2 ? 'linear-gradient(90deg, #ff9800, #ffb74d)' : 'linear-gradient(90deg, #f44336, #ef5350)'}; color: white; border-radius: 15px; font-weight: bold;">
+                                        ${pred.health_level}/5
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 25px; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 10px; color: #667eea; text-align: center; font-size: 0.9em;">
+                            Modèle: ${data.model_used} • Région: ${data.region} • Confiance: ${summary.confidence_level} • 
+                            ${new Date(data.timestamp).toLocaleString('fr-FR')}
+                        </div>
+                    `;
+                    
+                    showResult(html);
+                } else {
+                    showResult(`Erreur de prédiction: ${result.message}`, true);
+                }
+            } catch (error) {
+                showResult(`Erreur de connexion: ${error.message}`, true);
+            }
+        }
+
+        // Upload et analyse de fichier CSV
+        async function uploadAndPredict() {
+            const fileInput = document.getElementById('csvFile');
+            const uploadType = document.getElementById('uploadType').value;
+            
+            if (!fileInput.files[0]) {
+                showResult('Veuillez sélectionner un fichier CSV', true);
+                return;
+            }
+            
+            showLoading('Traitement et analyse du fichier CSV');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('type', uploadType);
+
+            try {
+                const response = await fetch('/upload/csv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success' || result.status === 'partial') {
+                    const data = result.data;
+                    let html = `
+                        <div class="prediction-card">
+                            <h2>📁 Résultats d'Analyse Massive</h2>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">Fichier Analysé</div>
+                                    <div style="font-size: 1.1em; font-weight: 600;">${data.filename}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">Type d'Analyse</div>
+                                    <div style="font-size: 1.1em; font-weight: 600;">${data.prediction_type}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">Lignes Traitées</div>
+                                    <div style="font-size: 1.5em; font-weight: bold; color: white;">${data.total_rows}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 25px;">
+                                <div style="background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(129,199,132,0.1)); padding: 25px; border-radius: 15px; text-align: center; border: 2px solid rgba(76,175,80,0.3);">
+                                    <h4 style="color: #4caf50; margin: 0; font-size: 1.1em;">Analyses Réussies</h4>
+                                    <p style="font-size: 3em; margin: 15px 0; color: #4caf50; font-weight: bold;">${data.successful_predictions}</p>
+                                </div>
+                                ${data.errors && data.errors.length > 0 ? `
+                                <div style="background: linear-gradient(135deg, rgba(244,67,54,0.1), rgba(239,83,80,0.1)); padding: 25px; border-radius: 15px; text-align: center; border: 2px solid rgba(244,67,54,0.3);">
+                                    <h4 style="color: #f44336; margin: 0; font-size: 1.1em;">Erreurs Détectées</h4>
+                                    <p style="font-size: 3em; margin: 15px 0; color: #f44336; font-weight: bold;">${data.errors.length}</p>
+                                </div>` : ''}
+                            </div>
+                    `;
+                    
+                    if (data.results && data.results.length > 0) {
+                        html += '<h4 style="color: #667eea; margin-bottom: 20px;">🎯 Aperçu des Résultats:</h4>';
+                        
+                        if (data.prediction_type === 'classification') {
+                            html += `
+                                <div style="overflow-x: auto;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Ligne</th>
+                                                <th>Classe Prédite</th>
+                                                <th>Niveau de Confiance</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                            `;
+                            
+                            data.results.slice(0, 10).forEach((result, index) => {
+                                html += `
+                                    <tr>
+                                        <td>${result.row_id + 1}</td>
+                                        <td style="font-weight: bold; color: #667eea;">${result.class_name}</td>
+                                        <td style="text-align: center;">
+                                            <span style="padding: 5px 12px; background: ${result.confidence > 80 ? 'linear-gradient(90deg, #4caf50, #66bb6a)' : result.confidence > 60 ? 'linear-gradient(90deg, #ff9800, #ffb74d)' : 'linear-gradient(90deg, #f44336, #ef5350)'}; color: white; border-radius: 15px; font-weight: bold; font-size: 0.9em;">
+                                                ${result.confidence}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            
+                            html += '</tbody></table></div>';
+                            
+                        } else {
+                            data.results.slice(0, 5).forEach((result, index) => {
+                                html += `
+                                    <div style="background: rgba(102,126,234,0.05); padding: 20px; margin: 15px 0; border-radius: 15px; border-left: 4px solid #667eea;">
+                                        <div style="font-weight: 600; color: #667eea; margin-bottom: 10px;">Ligne ${result.row_id + 1}: ${result.region}</div>
+                                        <div style="color: #718096;">Prédictions NDVI: <span style="font-family: monospace; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 8px;">[${result.predictions.join(', ')}]</span></div>
+                                    </div>
+                                `;
+                            });
+                        }
+                        
+                        if (data.results.length > 10) {
+                            html += `<p style="text-align: center; color: #718096; font-style: italic; margin-top: 20px;">... et ${data.results.length - 10} autres résultats disponibles</p>`;
+                        }
+                    }
+                    
+                    if (data.errors && data.errors.length > 0) {
+                        html += `
+                            <div style="margin-top: 30px;">
+                                <h4 style="color: #f44336;">⚠️ Erreurs Détectées:</h4>
+                                <div style="background: linear-gradient(135deg, rgba(244,67,54,0.1), rgba(239,83,80,0.1)); padding: 20px; border-radius: 15px; border-left: 4px solid #f44336;">
+                                    <ul style="margin: 0; padding-left: 25px; color: #c62828;">
+                        `;
+                        
+                        data.errors.slice(0, 5).forEach(error => {
+                            html += `<li style="margin-bottom: 8px;">${error}</li>`;
+                        });
+                        
+                        if (data.errors.length > 5) {
+                            html += `<li style="color: #718096; font-style: italic;">... et ${data.errors.length - 5} autres erreurs détectées</li>`;
+                        }
+                        
+                        html += `
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                    showResult(html);
+                } else {
+                    showResult(`Erreur d'analyse: ${result.message}`, true);
+                }
+            } catch (error) {
+                showResult(`Erreur de connexion: ${error.message}`, true);
+            }
+        }
+
+        // Génération de données aléatoires
+        function generateRandomData(type = 'classification') {
+            if (type === 'classification') {
+                const form = document.getElementById('classificationForm');
+                const inputs = form.querySelectorAll('input[type="number"]');
+                
+                inputs.forEach(input => {
+                    const name = input.name.toLowerCase();
+                    let value = 0;
+                    
+                    if (name.includes('ndvi') || name.includes('evi') || name.includes('nbr') || name.includes('ndmi')) {
+                        value = (0.3 + Math.random() * 0.5).toFixed(3);
+                    } else if (name.includes('elevation')) {
+                        value = Math.floor(Math.random() * 3000);
+                    } else if (name.includes('slope')) {
+                        value = Math.floor(Math.random() * 45);
+                    } else if (name.includes('aspect')) {
+                        value = Math.floor(Math.random() * 360);
+                    } else if (name.includes('precipitation')) {
+                        value = Math.floor(300 + Math.random() * 1500);
+                    } else if (name.includes('temperature')) {
+                        if (name.includes('mean')) {
+                            value = Math.floor(10 + Math.random() * 25);
+                        } else if (name.includes('min')) {
+                            value = Math.floor(5 + Math.random() * 15);
+                        } else if (name.includes('max')) {
+                            value = Math.floor(20 + Math.random() * 25);
+                        } else {
+                            value = Math.floor(10 + Math.random() * 25);
+                        }
+                    } else if (name.includes('health') || name.includes('vigor') || name.includes('stress')) {
+                        value = (0.1 + Math.random() * 0.8).toFixed(3);
+                    } else {
+                        value = (Math.random() * 2).toFixed(3);
+                    }
+                    
+                    input.value = value;
+                });
+                
+            } else if (type === 'timeseries') {
+                const inputs = document.querySelectorAll('#ndviInputs input[name="ndvi_value"]');
+                let baseValue = 0.4 + Math.random() * 0.4;
+                
+                inputs.forEach((input, index) => {
+                    const variation = (Math.random() - 0.5) * 0.1;
+                    const trendFactor = (Math.random() - 0.5) * 0.02;
+                    
+                    baseValue = Math.max(0.1, Math.min(0.9, baseValue + variation + trendFactor));
+                    input.value = baseValue.toFixed(3);
+                });
+            }
+        }
+
+        // Gestion des entrées NDVI dynamiques
+        function addNdviInput() {
+            const container = document.getElementById('ndviInputs');
+            const currentInputs = container.querySelectorAll('input[name="ndvi_value"]');
+            const currentYear = 2020 + currentInputs.length;
+            
+            if (currentYear > 2030) {
+                alert('Maximum 10 années supportées');
+                return;
+            }
+            
+            let targetRow = container.querySelector('.form-row:last-child');
+            const fieldsInRow = targetRow.querySelectorAll('.form-field').length;
+            
+            if (fieldsInRow >= 3) {
+                targetRow = document.createElement('div');
+                targetRow.className = 'form-row';
+                container.appendChild(targetRow);
+            }
+            
+            const newField = document.createElement('div');
+            newField.className = 'form-field';
+            newField.innerHTML = `
+                <label>📅 NDVI ${currentYear}</label>
+                <input type="number" name="ndvi_value" min="0" max="1" step="0.001" value="0.600">
+                <button type="button" class="btn btn-secondary" 
+                        style="margin-top: 15px; padding: 8px 15px; font-size: 12px;" 
+                        onclick="this.parentElement.remove()">❌ Supprimer</button>
+            `;
+            
+            targetRow.appendChild(newField);
+        }
+
+        // Gestion de la sélection de fichier
+        function handleFileSelect() {
+            const fileInput = document.getElementById('csvFile');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const fileSize = (file.size / 1024).toFixed(1);
+                const fileInfo = `${file.name} (${fileSize} KB)`;
+                
+                document.querySelector('.file-upload h3').textContent = 'Fichier Prêt pour Analyse';
+                document.querySelector('.file-upload p').innerHTML = `
+                    <span style="color: #667eea; font-weight: 600;">✅ ${fileInfo}</span>
+                `;
+                document.querySelector('.file-upload').style.borderColor = '#667eea';
+                document.querySelector('.file-upload').style.background = 'linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))';
+                
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '📤 Lancer l\'Analyse Complète';
+                uploadBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+        }
+
+        // Drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUpload = document.querySelector('.file-upload');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                fileUpload.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                fileUpload.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                fileUpload.addEventListener(eventName, unhighlight, false);
+            });
+
+            fileUpload.addEventListener('drop', handleDrop, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function highlight(e) {
+                fileUpload.style.borderColor = '#764ba2';
+                fileUpload.style.background = 'linear-gradient(135deg, rgba(118,75,162,0.15), rgba(102,126,234,0.15))';
+                fileUpload.style.transform = 'translateY(-3px)';
+            }
+
+            function unhighlight(e) {
+                fileUpload.style.borderColor = '#667eea';
+                fileUpload.style.background = 'linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05))';
+                fileUpload.style.transform = 'translateY(0)';
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    document.getElementById('csvFile').files = files;
+                    handleFileSelect();
+                }
+            }
+        });
+
+        // Animation d'amélioration de l'UX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation d'entrée pour les sections
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'all 0.6s ease';
+                observer.observe(section);
+            });
+
+            // Effet de typing pour le header
+            const headerText = document.querySelector('.header h1');
+            if (headerText) {
+                const text = headerText.textContent;
+                headerText.textContent = '';
+                let i = 0;
+                
+                const typeWriter = () => {
+                    if (i < text.length) {
+                        headerText.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 100);
+                    }
+                };
+                
+                setTimeout(typeWriter, 500);
+            }
+        });
+
+        // Amélioration des effets visuels
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parallax effect léger pour le background
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                document.body.style.backgroundPosition = `0 ${rate}px`;
+            });
+
+            // Effet de particules flottantes
+            function createFloatingParticle() {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '4px';
+                particle.style.height = '4px';
+                particle.style.background = 'rgba(255,255,255,0.3)';
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '0';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = '100vh';
+                particle.style.animation = 'float-up 8s linear forwards';
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 8000);
+            }
+
+            // CSS pour l'animation de particules
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes float-up {
+                    to {
+                        transform: translateY(-100vh) translateX(${Math.random() * 100 - 50}px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Créer des particules périodiquement
+            setInterval(createFloatingParticle, 3000);
+        });
+    </script>
+</body>
+</html>
