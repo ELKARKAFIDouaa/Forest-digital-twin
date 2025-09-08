@@ -104,7 +104,7 @@ CREATE TABLE sensors (
 );
 
 -- Table données reçues
-CREATE TABLE iot_data (
+CREATE TABLE sensor_data (
     id SERIAL PRIMARY KEY,
     sensor_id VARCHAR(100) REFERENCES sensors(sensor_id) ON DELETE CASCADE,
     value FLOAT,

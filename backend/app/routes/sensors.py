@@ -126,3 +126,53 @@ def delete_sensor_data(data_id):
     db.session.delete(sensor_data)
     db.session.commit()
     return jsonify({"message": "Data deleted"})
+
+# Get History Data
+@sensors_bp.route("/history", methods=["GET"])
+def get_history():
+    """
+    Returns the latest N sensor data records across all sensors,
+    oldest → newest.
+    """
+    limit = request.args.get("limit", default=500, type=int)
+
+    # Query latest records
+    data = SensorData.query.order_by(SensorData.timestamp.desc()).limit(limit).all()
+
+    # Return oldest → newest with ISO timestamps
+    return jsonify([{
+        "id": d.id,
+        "sensor_id": d.sensor_id,
+        "name": d.sensor.name,
+        "value": d.value,
+        "unit": d.sensor.unit,
+        "timestamp": d.timestamp.isoformat()
+    } for d in reversed(data)])
+
+
+
+# ----------------------------
+# HISTORY ENDPOINT
+# ----------------------------
+@sensors_bp.route("/history", methods=["GET"])
+def get_sensor_history():
+    """
+    Returns the latest N sensor data records across all sensors,
+    ordered from oldest → newest.
+    """
+    limit = request.args.get("limit", default=500, type=int)
+
+    # Get latest records
+    data = SensorData.query.order_by(SensorData.timestamp.desc()).limit(limit).all()
+
+    # Reverse to make oldest → newest
+    results = [{
+        "id": d.id,
+        "sensor_id": d.sensor_id,
+        "name": d.sensor.name if d.sensor else None,
+        "value": d.value,
+        "unit": d.sensor.unit if d.sensor else None,
+        "timestamp": d.timestamp.isoformat()
+    } for d in reversed(data)]
+
+    return jsonify(results)

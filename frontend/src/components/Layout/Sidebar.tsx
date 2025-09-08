@@ -1,10 +1,11 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
 
   const navigationItems = [
@@ -15,6 +16,11 @@ const Sidebar: React.FC = () => {
     { path: '/users', icon: Users, label: 'Utilisateurs' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
+
+  const handleLogout = () => {
+    logout();          // clear session/auth
+    navigate('/login'); // redirect to login page
+  };
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
@@ -37,7 +43,7 @@ const Sidebar: React.FC = () => {
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <li key={item.path}>
                 <NavLink
@@ -60,7 +66,7 @@ const Sidebar: React.FC = () => {
       {/* Logout */}
       <div className="p-4 border-t border-gray-200">
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />
