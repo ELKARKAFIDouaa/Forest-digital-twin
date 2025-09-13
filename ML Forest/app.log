@@ -1,0 +1,40 @@
+2025-09-09 23:14:35,281 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:14:35,282 - app - INFO - Required features: 25
+2025-09-09 23:15:00,111 - app - ERROR - Error in file prediction: The feature names should match those that were passed during fit.
+Feature names seen at fit time, yet now missing:
+- B11
+- B11_log
+- B12
+- B12_log
+- B2
+- ...
+
+2025-09-09 23:15:06,115 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:15:06,116 - app - INFO - Required features: 25
+2025-09-09 23:17:56,641 - app - ERROR - Error in file prediction: The feature names should match those that were passed during fit.
+Feature names seen at fit time, yet now missing:
+- B11
+- B11_log
+- B12
+- B12_log
+- B2
+- ...
+
+2025-09-09 23:23:19,248 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:23:19,248 - app - INFO - All features: 71
+2025-09-09 23:23:19,249 - app - INFO - Selected features: 25
+2025-09-09 23:25:43,416 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:25:43,417 - app - INFO - All features: 71
+2025-09-09 23:25:43,418 - app - INFO - Selected features: 25
+2025-09-09 23:25:49,719 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:25:49,720 - app - INFO - All features: 71
+2025-09-09 23:25:49,721 - app - INFO - Selected features: 25
+2025-09-09 23:27:39,407 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:27:39,408 - app - INFO - All features: 71
+2025-09-09 23:27:39,408 - app - INFO - Selected features: 25
+2025-09-09 23:29:00,886 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:29:00,887 - app - INFO - All features: 71
+2025-09-09 23:29:00,887 - app - INFO - Selected features: 25
+2025-09-09 23:29:05,053 - app - INFO - Model loaded successfully: XGBoost
+2025-09-09 23:29:05,054 - app - INFO - All features: 71
+2025-09-09 23:29:05,055 - app - INFO - Selected features: 25

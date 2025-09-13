@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Health Predictor - Système de Prédiction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online {
+            background: #10b981;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input[type="number"],
+        .input-group input[type="file"],
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .feature-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-input label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .feature-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .prediction-result {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prediction-class {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .confidence-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .probabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .statistics-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .recommendations {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .recommendations h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+
+        .recommendations ul {
+            list-style-position: inside;
+            color: #92400e;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+            to {
+                max-height: 100px;
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌲 Forest Health Predictor</h1>
+            <p>Système avancé de prédiction de santé forestière</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <span class="status-dot offline" id="statusDot"></span>
+                <span id="statusText">Connexion en cours...</span>
+            </div>
+            <div>
+                <span id="modelInfo">Modèle: --</span>
+            </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="main-content">
+            <!-- Prédiction manuelle -->
+            <div class="card">
+                <h2>📝 Prédiction Manuelle</h2>
+                <div id="manualFeatures" class="features-grid">
+                    <div class="loading active">
+                        <div class="spinner"></div>
+                        <p>Chargement des features...</p>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-warning" onclick="generateRandomValues()">
+                        🎲 Générer Valeurs
+                    </button>
+                    <button class="btn btn-primary" onclick="predictManual()">
+                        🔮 Prédire
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload de fichier -->
+            <div class="card">
+                <h2>📁 Upload de Fichier</h2>
+                <div class="input-group">
+                    <label for="fileUpload">Sélectionner un fichier (CSV, Excel, TXT)</label>
+                    <input type="file" id="fileUpload" accept=".csv,.xlsx,.xls,.txt">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="downloadTemplate()">
+                        📥 Télécharger Template
+                    </button>
+                    <button class="btn btn-primary" onclick="predictFile()">
+                        📊 Analyser Fichier
+                    </button>
+                </div>
+                <div id="fileInfo" style="margin-top: 15px; display: none;">
+                    <p style="color: #666; font-size: 14px;">
+                        <strong>Fichier:</strong> <span id="fileName"></span><br>
+                        <strong>Taille:</strong> <span id="fileSize"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section des résultats -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2>📈 Résultats de Prédiction</h2>
+            
+            <div id="loadingResults" class="loading">
+                <div class="spinner"></div>
+                <p>Traitement en cours...</p>
+            </div>
+
+            <div id="predictionsContainer"></div>
+            
+            <div id="statisticsContainer"></div>
+            
+            <div id="recommendationsContainer"></div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="exportResults('csv')">
+                    💾 Exporter CSV
+                </button>
+                <button class="btn btn-success" onclick="exportResults('json')">
+                    📋 Exporter JSON
+                </button>
+                <button class="btn btn-secondary" onclick="clearResults()">
+                    🗑️ Effacer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5001';
+        let modelFeatures = [];
+        let currentPredictions = [];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            loadModelInfo();
+        });
+
+        // Vérifier le statut du serveur
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                
+                if (data.status === 'healthy') {
+                    statusDot.classList.remove('offline');
+                    statusDot.classList.add('online');
+                    statusText.textContent = 'Serveur en ligne';
+                    document.getElementById('modelInfo').textContent = `Modèle: ${data.model_name || 'Non chargé'}`;
+                } else {
+                    throw new Error('Server unhealthy');
+                }
+            } catch (error) {
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                statusDot.classList.remove('online');
+                statusDot.classList.add('offline');
+                statusText.textContent = 'Serveur hors ligne';
+                showAlert('Impossible de se connecter au serveur', 'error');
+            }
+        }
+
+        // Charger les informations du modèle
+        async function loadModelInfo() {
+            try {
+                const response = await fetch(`${API_URL}/model/info`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    modelFeatures = data.all_features;
+                    displayManualFeatures();
+                    showAlert(`Modèle ${data.model_name} chargé avec ${data.total_features_count} features`, 'success');
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement du modèle:', error);
+                showAlert('Erreur lors du chargement du modèle', 'error');
+            }
+        }
+
+        // Afficher les champs de features pour la saisie manuelle
+        function displayManualFeatures() {
+            const container = document.getElementById('manualFeatures');
+            container.innerHTML = '';
+            
+            modelFeatures.forEach(feature => {
+                const div = document.createElement('div');
+                div.className = 'feature-input';
+                div.innerHTML = `
+                    <label for="feature_${feature}">${feature}</label>
+                    <input type="number" id="feature_${feature}" step="0.0001" value="0">
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Générer des valeurs aléatoires
+        function generateRandomValues() {
+            modelFeatures.forEach(feature => {
+                const input = document.getElementById(`feature_${feature}`);
+                if (input) {
+                    input.value = (Math.random()).toFixed(4);
+                }
+            });
+            showAlert('Valeurs aléatoires générées', 'info');
+        }
+
+        // Prédiction manuelle
+        async function predictManual() {
+            const data = {};
+            modelFeatures.forEach(feature => {
+                const input = document.getElementById(`feature_${feature}`);
+                if (input) {
+                    data[feature] = parseFloat(input.value) || 0;
+                }
+            });
+
+            try {
+                showLoading('resultsSection', true);
+                const response = await fetch(`${API_URL}/predict/single`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPredictions = [result.prediction];
+                    displaySinglePrediction(result.prediction);
+                    showAlert('Prédiction effectuée avec succès', 'success');
+                } else {
+                    showAlert(result.message || 'Erreur lors de la prédiction', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors de la prédiction', 'error');
+            } finally {
+                showLoading('resultsSection', false);
+            }
+        }
+
+        // Prédiction par fichier
+        async function predictFile() {
+            const fileInput = document.getElementById('fileUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('Veuillez sélectionner un fichier', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showLoading('resultsSection', true);
+                const response = await fetch(`${API_URL}/predict/file`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPredictions = result.predictions;
+                    displayBatchPredictions(result);
+                    showAlert(`${result.predictions.length} prédictions effectuées`, 'success');
+                } else {
+                    showAlert(result.message || 'Erreur lors de l\'analyse', 'error');
+                    if (result.missing_features) {
+                        console.error('Features manquantes:', result.missing_features);
+                    }
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors de l\'upload du fichier', 'error');
+            } finally {
+                showLoading('resultsSection', false);
+            }
+        }
+
+        // Afficher une prédiction unique
+        function displaySinglePrediction(prediction) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            const container = document.getElementById('predictionsContainer');
+            container.innerHTML = `
+                <div class="prediction-result">
+                    <div class="prediction-header">
+                        <span class="prediction-class">${prediction.predicted_class}</span>
+                        <span class="confidence-badge">Confiance: ${(prediction.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="probabilities">
+                        ${Object.entries(prediction.probabilities).map(([cls, prob]) => `
+                            <div class="probability-item">
+                                <span>${cls}:</span>
+                                <strong>${(prob * 100).toFixed(1)}%</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Clear statistics and recommendations for single prediction
+            document.getElementById('statisticsContainer').innerHTML = '';
+            document.getElementById('recommendationsContainer').innerHTML = '';
+        }
+
+        // Afficher les prédictions en batch (toutes en même temps)
+        function displayBatchPredictions(result) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            // Afficher toutes les prédictions
+            const predictionsContainer = document.getElementById('predictionsContainer');
+            predictionsContainer.innerHTML = '<h3>Prédictions individuelles:</h3>';
+            
+            // Limiter l'affichage aux 100 premières prédictions pour la performance
+            const displayLimit = Math.min(result.predictions.length, 100);
+            const predictionsToShow = result.predictions.slice(0, displayLimit);
+            
+            predictionsToShow.forEach((pred, index) => {
+                const predDiv = document.createElement('div');
+                predDiv.className = 'prediction-result';
+                predDiv.innerHTML = `
+                    <div class="prediction-header">
+                        <span class="prediction-class">Ligne ${pred.row_id + 1}: ${pred.predicted_class}</span>
+                        <span class="confidence-badge">Confiance: ${(pred.confidence * 100).toFixed(1)}%</span>
+                    </div>
+                    <div class="probabilities">
+                        ${Object.entries(pred.probabilities).map(([cls, prob]) => `
+                            <div class="probability-item">
+                                <span>${cls}:</span>
+                                <strong>${(prob * 100).toFixed(1)}%</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                predictionsContainer.appendChild(predDiv);
+            });
+            
+            if (result.predictions.length > displayLimit) {
+                predictionsContainer.innerHTML += `
+                    <div class="alert alert-info show">
+                        Affichage limité aux ${displayLimit} premières prédictions sur ${result.predictions.length} total.
+                        Exportez les résultats pour voir toutes les prédictions.
+                    </div>
+                `;
+            }
+            
+            // Afficher les statistiques
+            if (result.statistics) {
+                displayStatistics(result.statistics);
+            }
+            
+            // Afficher les recommandations
+            if (result.recommendations) {
+                displayRecommendations(result.recommendations);
+            }
+        }
+
+        // Afficher les statistiques
+        function displayStatistics(statistics) {
+            const container = document.getElementById('statisticsContainer');
+            container.innerHTML = `
+                <div class="statistics-card">
+                    <h3>📊 Statistiques</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${statistics.total_rows}</div>
+                            <div class="stat-label">Total de lignes</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${(statistics.average_confidence * 100).toFixed(1)}%</div>
+                            <div class="stat-label">Confiance moyenne</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${(statistics.min_confidence * 100).toFixed(1)}%</div>
+                            <div class="stat-label">Confiance min</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${(statistics.max_confidence * 100).toFixed(1)}%</div>
+                            <div class="stat-label">Confiance max</div>
+                        </div>
+                    </div>
+                    <h4 style="margin-top: 15px;">Distribution des classes:</h4>
+                    <div class="stat-grid">
+                        ${Object.entries(statistics.class_distribution).map(([cls, count]) => `
+                            <div class="stat-item">
+                                <div class="stat-value">${count}</div>
+                                <div class="stat-label">${cls}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Afficher les recommandations
+        function displayRecommendations(recommendations) {
+            const container = document.getElementById('recommendationsContainer');
+            container.innerHTML = `
+                <div class="recommendations">
+                    <h3>💡 Recommandations</h3>
+                    <ul>
+                        ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Télécharger le template
+        async function downloadTemplate() {
+            try {
+                window.location.href = `${API_URL}/model/template/download`;
+                showAlert('Téléchargement du template en cours...', 'info');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors du téléchargement', 'error');
+            }
+        }
+
+        // Exporter les résultats
+        async function exportResults(format) {
+            if (!currentPredictions || currentPredictions.length === 0) {
+                showAlert('Aucun résultat à exporter', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/export/results`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        predictions: currentPredictions,
+                        format: format
+                    })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `predictions.${format}`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showAlert(`Export ${format.toUpperCase()} réussi`, 'success');
+                } else {
+                    throw new Error('Export failed');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors de l\'export', 'error');
+            }
+        }
+
+        // Effacer les résultats
+        function clearResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('predictionsContainer').innerHTML = '';
+            document.getElementById('statisticsContainer').innerHTML = '';
+            document.getElementById('recommendationsContainer').innerHTML = '';
+            currentPredictions = [];
+            showAlert('Résultats effacés', 'info');
+        }
+
+        // Gestion du chargement
+        function showLoading(sectionId, show) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                if (show) {
+                    section.style.display = 'block';
+                    const loading = section.querySelector('.loading');
+                    if (loading) {
+                        loading.classList.add('active');
+                    }
+                } else {
+                    const loading = section.querySelector('.loading');
+                    if (loading) {
+                        loading.classList.remove('active');
+                    }
+                }
+            }
+        }
+
+        // Afficher une alerte
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} show`;
+            alert.textContent = message;
+            
+            container.innerHTML = '';
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        }
+
+        // Gestion de l'upload de fichier
+        document.getElementById('fileUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+            }
+        });
+
+        // Rafraîchir le statut toutes les 30 secondes
+        setInterval(checkServerStatus, 30000);
+    </script>
+</body>
+</html>

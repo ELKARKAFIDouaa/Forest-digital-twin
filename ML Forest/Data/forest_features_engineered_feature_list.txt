@@ -1,0 +1,100 @@
+NOUVELLES FEATURES CR……ES
+==================================================
+
+Spectral:
+  - NIR_Red_ratio
+  - SWIR1_NIR_ratio
+  - SWIR2_SWIR1_ratio
+  - NIR_Green_ratio
+  - Red_Green_ratio
+  - RedEdge_Red_ratio
+  - RedEdge2_RedEdge1_ratio
+  - NIR_Narrow_Wide_ratio
+  - red_edge_position
+  - red_edge_amplitude
+  - red_edge_slope
+  - red_edge_asymmetry
+  - IRECI
+  - S2REP
+  - brightness
+  - greenness
+  - wetness
+  - visible_diversity
+  - spectral_contrast
+  - spectral_PC1
+  - spectral_PC2
+  - spectral_PC3
+  - B11_log
+  - B12_log
+  - forest_canopy_density
+  - LAI_approx
+  - canopy_water_content
+  - anthocyanin_index
+
+Topographic:
+  - northness
+  - eastness
+  - solar_exposure
+  - wind_protection
+  - exposure_class
+  - elevation_zone
+  - slope_class
+  - terrain_roughness
+  - topographic_wetness_index
+  - topographic_position
+  - precipitation_efficiency
+
+Ecological:
+  - forest_health_composite
+  - vegetation_vigor
+  - canopy_condition
+  - water_stress_index
+  - recovery_potential
+  - biodiversity_potential
+  - health_class_detailed
+
+Interaction:
+  - precip_slope_interaction
+  - ndvi_topo_adjusted
+  - productivity_per_elevation
+  - productivity_stress_ratio
+
+Ml Ready:
+  - NDVI_standardized
+  - NDMI_standardized
+  - EVI_standardized
+  - forest_health_composite_standardized
+  - water_stress_index_standardized
+  - recovery_potential_minmax
+  - NDVI_squared
+  - NDMI_squared
+  - precipitation_squared
+  - NDVI_precipitation_product
+  - elevation_binned
+  - precipitation_binned
+  - NDVI_binned
+  - exposure_class_is_East_facing
+  - exposure_class_is_Flat
+  - exposure_class_is_North_facing
+  - exposure_class_is_South_facing
+  - exposure_class_is_West_facing
+  - exposure_class_is_nan
+  - slope_class_is_Gentle
+  - slope_class_is_Moderate
+  - slope_class_is_Steep
+  - slope_class_is_Very_Gentle
+  - slope_class_is_Very_Steep
+  - slope_class_is_nan
+  - elevation_zone_is_Alpine
+  - elevation_zone_is_Colline
+  - elevation_zone_is_Lowland
+  - elevation_zone_is_Montane_High
+  - elevation_zone_is_Montane_Low
+  - elevation_zone_is_nan
+  - health_class_detailed_is_Critical
+  - health_class_detailed_is_Excellent
+  - health_class_detailed_is_Fair
+  - health_class_detailed_is_Good
+  - health_class_detailed_is_Poor
+  - health_class_detailed_is_nan
+
