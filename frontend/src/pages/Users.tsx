@@ -1,59 +1,82 @@
-import React, { useState } from 'react';
-import { Plus, Search, Filter, MoreVertical, Mail, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Filter, Edit, Trash } from 'lucide-react';
 import { User } from '../types';
+import * as userAPI from '../services/userAPI';
+import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from '../components/Common/LoadingSpinner';
+import { useNavigate } from 'react-router-dom';
 
 const Users: React.FC = () => {
-  const [users] = useState<User[]>([
-    {
-      id: '1',
-      email: 'john.doe@forestdt.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      role: 'admin',
-      createdAt: '2024-12-01T10:00:00Z',
-    },
-    {
-      id: '2',
-      email: 'jane.smith@forestdt.com',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      role: 'user',
-      createdAt: '2024-12-15T14:30:00Z',
-    },
-    {
-      id: '3',
-      email: 'mike.johnson@forestdt.com',
-      firstName: 'Mike',
-      lastName: 'Johnson',
-      role: 'viewer',
-      createdAt: '2025-01-05T09:15:00Z',
-    },
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
+  const { hasRole } = useAuth();
+
+  // ---------------- Fetch users ----------------
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        if (!hasRole('admin')) {
+          setError("Accès non autorisé.");
+          return;
+        }
+        const usersData = await userAPI.getUsers();
+        setUsers(usersData);
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Erreur lors de la récupération des utilisateurs.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [hasRole]);
+
+  // ---------------- Filters ----------------
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      user.firstname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesRole = roleFilter === 'all' || user.roles.includes(roleFilter);
     return matchesSearch && matchesRole;
   });
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'user':
-        return 'bg-blue-100 text-blue-800';
-      case 'viewer':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  // ---------------- Handlers ----------------
+  const handleDelete = async (userId: string) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
+    try {
+      await userAPI.deleteUser(userId);
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (err) {
+      alert("Erreur lors de la suppression.");
     }
   };
+
+  const handleEdit = (user: User) => {
+    navigate(`/users/edit/${user.id}`);
+  };
+
+  // ---------------- Render ----------------
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12 text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,7 +88,10 @@ const Users: React.FC = () => {
             Gérez les utilisateurs et leurs permissions d'accès
           </p>
         </div>
-        <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2">
+        <button
+          onClick={() => navigate('/users/add')}
+          className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+        >
           <Plus className="w-5 h-5" />
           <span>Inviter un utilisateur</span>
         </button>
@@ -74,7 +100,6 @@ const Users: React.FC = () => {
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-          {/* Search */}
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
@@ -85,8 +110,6 @@ const Users: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
-
-          {/* Role filter */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Filter className="w-5 h-5 text-gray-400" />
@@ -100,6 +123,7 @@ const Users: React.FC = () => {
               <option value="all">Tous</option>
               <option value="admin">Administrateur</option>
               <option value="user">Utilisateur</option>
+              <option value="agent">Agent</option>
               <option value="viewer">Observateur</option>
             </select>
           </div>
@@ -107,64 +131,59 @@ const Users: React.FC = () => {
       </div>
 
       {/* Users table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left py-4 px-6 font-medium text-gray-900">Utilisateur</th>
-                <th className="text-left py-4 px-6 font-medium text-gray-900">Rôle</th>
-                <th className="text-left py-4 px-6 font-medium text-gray-900">Date d'ajout</th>
-                <th className="text-left py-4 px-6 font-medium text-gray-900">Actions</th>
+      <div className="overflow-x-auto bg-white rounded-xl border border-gray-200 shadow-sm">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Prénom</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Nom</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Téléphone</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Rôle</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Date création</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {filteredUsers.map((user) => (
+              <tr key={user.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">{user.firstname}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.lastname}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-gray-600">{user.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{user.telephone}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {user.roles.length > 0 ? user.roles.join(', ') : 'Viewer'}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(user.createdAt).toLocaleDateString('fr-FR')}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap flex space-x-3">
+                  <button
+                    onClick={() => handleEdit(user)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <Edit className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash className="w-5 h-5" />
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="py-4 px-6">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                        <span className="text-emerald-600 font-medium">
-                          {user.firstName[0]}{user.lastName[0]}
-                        </span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-sm text-gray-600 flex items-center">
-                          <Mail className="w-4 h-4 mr-1" />
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
-                      <Shield className="w-3 h-3 inline mr-1" />
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-sm text-gray-600">
-                    {new Date(user.createdAt).toLocaleDateString('fr-FR')}
-                  </td>
-                  <td className="py-4 px-6">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            ))}
+          </tbody>
+        </table>
 
-      {filteredUsers.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">Aucun utilisateur trouvé avec les filtres actuels.</p>
-        </div>
-      )}
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">
+              Aucun utilisateur trouvé avec les filtres actuels.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

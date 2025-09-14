@@ -13,6 +13,7 @@
     "@react-three/drei": "^9.56.11",
     "@react-three/fiber": "^8.13.7",
     "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.11.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",

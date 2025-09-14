@@ -1,26 +1,34 @@
 import React from 'react';
+
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
+import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut, LayoutDashboard } from 'lucide-react';
+
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Navigation par défaut
   const navigationItems = [
     { path: '/DigitalTwin', icon: TreePine, label: 'Digital Twin' },
-    { path: '/dashboard', icon: Gauge, label: 'Tableau de bord' },
-    { path: '/sensors', icon: Activity, label: 'Capteurs' },
-    { path: '/reports', icon: FileText, label: 'Rapports' },
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
     { path: '/users', icon: Users, label: 'Utilisateurs' },
+    { path: '/roles', icon: Activity, label: 'Roles et permissions' },
+    { path: '/sensors', icon: Users, label: 'Capteurs' },
+    { path: '/reports', icon: FileText, label: 'Rapports' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
+
 
   const handleLogout = () => {
     logout();          // clear session/auth
     navigate('/login'); // redirect to login page
   };
+
+  
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">

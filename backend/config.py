@@ -8,4 +8,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "pass123")
-
+    SESSION_COOKIE_SAMESITE = "None"
+    SESSION_COOKIE_SECURE = False  
