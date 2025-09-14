@@ -25,7 +25,7 @@ const LoginForm: React.FC = () => {
         navigate("/dashboard");
       } else if (user.roles.includes('user')) {
         navigate("/dashboarduser");
-        else if (user.roles.includes('user')) {
+      } else if (user.roles.includes('agent')) {
         navigate("/dashboard");
       } else {
         navigate("/");

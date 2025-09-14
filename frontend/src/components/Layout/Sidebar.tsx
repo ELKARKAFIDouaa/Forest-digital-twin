@@ -1,25 +1,34 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Scissors as Sensors, FileText, Users, Settings, TreePine, LogOut } from 'lucide-react';
+
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut, LayoutDashboard } from 'lucide-react';
+
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { logout, user, hasRole } = useAuth();
+
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Navigation par défaut
   const navigationItems = [
     { path: '/DigitalTwin', icon: TreePine, label: 'Digital Twin' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+    { path: '/users', icon: Users, label: 'Utilisateurs' },
+    { path: '/roles', icon: Activity, label: 'Roles et permissions' },
+    { path: '/sensors', icon: Users, label: 'Capteurs' },
     { path: '/reports', icon: FileText, label: 'Rapports' },
     { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
 
-  // ✅ Ajout conditionnel si admin
-  if (hasRole('admin')) {
-    navigationItems.splice(2, 0, { path: '/sensors', icon: Sensors, label: 'Capteurs' });
-    navigationItems.splice(3, 0, { path: '/users', icon: Users, label: 'Utilisateurs' });
-  }
+
+  const handleLogout = () => {
+    logout();          // clear session/auth
+    navigate('/login'); // redirect to login page
+  };
+
+  
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
@@ -42,7 +51,7 @@ const Sidebar: React.FC = () => {
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <li key={item.path}>
                 <NavLink
@@ -65,7 +74,7 @@ const Sidebar: React.FC = () => {
       {/* Logout */}
       <div className="p-4 border-t border-gray-200">
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center space-x-3 px-4 py-3 w-full text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />

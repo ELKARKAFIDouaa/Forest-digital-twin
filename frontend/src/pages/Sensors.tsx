@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, Search } from 'lucide-react';
-import SensorCard from '../components/Sensors/SensorCard';
+import { Plus, Search, Filter, Edit, Trash } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Sensor } from '../types';
 import * as sensorAPI from '../services/sensorAPI';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
+import SensorCard from '../components/Sensors/SensorCard';
 
 const Sensors: React.FC = () => {
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const navigate = useNavigate();
 
+  // ---------------- Fetch sensors ----------------
   useEffect(() => {
     const fetchSensors = async () => {
       try {
+        setIsLoading(true);
         const sensorsData = await sensorAPI.getSensors();
         setSensors(sensorsData);
-      } catch (error) {
-        console.error('Failed to fetch sensors:', error);
+        setError(null);
+      } catch (err: any) {
+        setError('Erreur lors de la récupération des capteurs.');
       } finally {
         setIsLoading(false);
       }
@@ -26,13 +32,35 @@ const Sensors: React.FC = () => {
     fetchSensors();
   }, []);
 
+  // ---------------- Filters ----------------
   const filteredSensors = sensors.filter(sensor => {
-    const matchesSearch = sensor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         sensor.location.zone.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      sensor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sensor.zone ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || sensor.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
+  // ---------------- Handlers ----------------
+  const handleDelete = async (sensorId: string) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer ce capteur ?")) return;
+    try {
+      await sensorAPI.deleteSensor(sensorId);
+      setSensors(prev => prev.filter(s => s.id !== sensorId));
+    } catch (err) {
+      alert("Erreur lors de la suppression du capteur.");
+    }
+  };
+
+  const handleEdit = (sensor: Sensor) => {
+    navigate(`/sensors/edit/${sensor.id}`);
+  };
+
+  const handleSensorClick = (sensorId: string) => {
+    navigate(`/sensors/${sensorId}`);
+  };
+
+  // ---------------- Render ----------------
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -51,11 +79,22 @@ const Sensors: React.FC = () => {
             Gérez et surveillez tous vos capteurs environnementaux
           </p>
         </div>
-        <button className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2">
-          <Plus className="w-5 h-5" />
-          <span>Ajouter un capteur</span>
-        </button>
+        <button
+  onClick={() => navigate('/sensors/add')}
+  className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+>
+  <Plus className="w-5 h-5" />
+  <span>Ajouter un capteur</span>
+</button>
+
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">{error}</p>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -95,17 +134,33 @@ const Sensors: React.FC = () => {
       {/* Sensors grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSensors.map((sensor) => (
-          <SensorCard
-            key={sensor.id}
-            sensor={sensor}
-            onClick={() => console.log('Navigate to sensor details:', sensor.id)}
-          />
+          <div key={sensor.id} className="relative group">
+            <SensorCard sensor={sensor} onClick={() => handleSensorClick(sensor.id)} />
+            <div className="absolute top-2 right-2 hidden group-hover:flex space-x-2">
+              <button
+                onClick={() => handleEdit(sensor)}
+                className="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+              >
+                <Edit className="w-4 h-4 text-blue-500" />
+              </button>
+              <button
+                onClick={() => handleDelete(sensor.id)}
+                className="bg-white rounded-full p-2 shadow hover:bg-gray-100"
+              >
+                <Trash className="w-4 h-4 text-red-500" />
+              </button>
+            </div>
+          </div>
         ))}
       </div>
 
-      {filteredSensors.length === 0 && (
+      {filteredSensors.length === 0 && !isLoading && (
         <div className="text-center py-12">
-          <p className="text-gray-500">Aucun capteur trouvé avec les filtres actuels.</p>
+          <p className="text-gray-500">
+            {searchTerm || statusFilter !== 'all'
+              ? "Aucun capteur ne correspond à vos critères de recherche"
+              : "Aucun capteur n'est configuré pour le moment"}
+          </p>
         </div>
       )}
     </div>

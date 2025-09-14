@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.services.auth_service import AuthService
+from app.models.user import User
+
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -21,7 +23,8 @@ def register():
         return jsonify({"error": error}), 400
 
     # ✅ Créer un token JWT pour le nouvel utilisateur
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
+
     
     return jsonify({
         "message": "Utilisateur créé avec succès",
@@ -48,7 +51,8 @@ def login():
         return jsonify({"error": "Identifiants invalides"}), 401
 
     # ✅ Créer un token JWT
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
+
     
     return jsonify({
         "message": "Connexion réussie",
@@ -68,7 +72,7 @@ def login():
 @jwt_required()
 def me():
     user_id = get_jwt_identity()
-    user = AuthService.get_user_by_id(user_id)
+    user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "Utilisateur non trouvé"}), 404
 

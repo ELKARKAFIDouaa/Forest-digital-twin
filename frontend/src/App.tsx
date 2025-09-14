@@ -11,10 +11,13 @@ import DashboardUser from './pages/Dashboarduser';
 import Sensors from './pages/Sensors';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
+import Roles from './pages/Roles';
+import EditUser from './pages/EditUser';
+import UserForm from './pages/UserForm'
 import Settings from './pages/Settings';
 import DigitalTwin from './pages/Digitaltwin';
 import Home from './pages/Home';
-
+import AddSensor from './pages/AddSensor';
 function App() {
   return (
     <AuthProvider>
@@ -49,6 +52,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/digitaltwin"
             element={
@@ -65,6 +69,16 @@ function App() {
               <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <Sensors />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sensors/add"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <AddSensor />
                 </Layout>
               </ProtectedRoute>
             }
@@ -89,6 +103,37 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+          path="/users/edit/:id"
+          element={
+              <ProtectedRoute requiredRole="admin">
+              <Layout>
+                 <EditUser />
+              </Layout>
+              </ProtectedRoute>
+          }
+/>
+<Route
+          path="/users/add"
+          element={
+              <ProtectedRoute requiredRole="admin">
+              <Layout>
+                 <UserForm/>
+              </Layout>
+              </ProtectedRoute>
+          }
+/>
+<Route
+          path="/roles"
+          element={
+              <ProtectedRoute requiredRole="admin">
+              <Layout>
+                 <Roles/>
+              </Layout>
+              </ProtectedRoute>
+          }
+/>
+
           <Route
             path="/settings"
             element={

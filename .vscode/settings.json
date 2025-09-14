@@ -1,5 +1,16 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+{}
+=======
+>>>>>>> main-01
 {
     "python.analysis.extraPaths": [
         "./backend"
     ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 47f37ca8496cf918f73e1cba223cd86f28af8f94
+>>>>>>> main-01
