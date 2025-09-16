@@ -79,3 +79,4 @@ UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f in position 14818: ch
 2025-09-15 19:52:46,954 - ERROR - Model loading error: No module named 'xgboost'
 2025-09-15 20:04:33,898 - ERROR - Model loading error: No module named 'xgboost'
 2025-09-16 12:07:03,215 - ERROR - Model loading error: No module named 'xgboost'
+2025-09-16 12:50:54,829 - ERROR - Model loading error: No module named 'xgboost'
