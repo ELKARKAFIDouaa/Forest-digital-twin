@@ -40,13 +40,14 @@ const getAuthHeaders = (): Record<string, string> => {
 const normalizeUserFromServer = (raw: any): User => ({
   id: raw.id?.toString(),
   email: raw.email,
-  firstname: raw.firstname || raw.first_name || '',
-  lastname: raw.lastname || raw.last_name || '',
+  firstname: raw.firstname || '',
+  lastname: raw.lastname || '',
   telephone: raw.telephone || '',
-  roles: Array.isArray(raw.roles) ? raw.roles : raw.role ? [raw.role] : [],
+  roles: raw.roles && raw.roles.length > 0 ? raw.roles : [],   // <-- FIX ICI
   permissions: raw.permissions || [],
-  createdAt: raw.created_at || new Date().toISOString(),
+  createdAt: raw.created_at ? new Date(raw.created_at).toISOString() : new Date().toISOString(),
 });
+
 
 // ------------------- Users -------------------
 export const getUsers = async (): Promise<User[]> => {

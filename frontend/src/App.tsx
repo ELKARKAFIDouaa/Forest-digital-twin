@@ -12,12 +12,16 @@ import Sensors from './pages/Sensors';
 import Reports from './pages/Reports';
 import Users from './pages/Users';
 import Roles from './pages/Roles';
+import AlertsPage from './pages/Alert';
 import EditUser from './pages/EditUser';
 import UserForm from './pages/UserForm'
 import Settings from './pages/Settings';
 import DigitalTwin from './pages/Digitaltwin';
 import Home from './pages/Home';
 import AddSensor from './pages/AddSensor';
+import EditSensor from "./pages/EditSensor";
+import PredictionPage  from './pages/PredictionPage';
+
 function App() {
   return (
     <AuthProvider>
@@ -33,15 +37,15 @@ function App() {
 
           {/* Protected routes */}
           <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <Layout>
-                  <Dashboard />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+                path="/dashboard"
+                element={
+                  <ProtectedRoute requiredRole={["admin", "agent" ,"chercheur" ]}>
+                    <Layout>
+                      <Dashboard />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+/>
           <Route
             path="/dashboarduser"
             element={
@@ -56,7 +60,7 @@ function App() {
           <Route
             path="/digitaltwin"
             element={
-              <ProtectedRoute requiredRole={["admin", "user"]}>
+              <ProtectedRoute requiredRole={["admin", "agent", "chercheur", "user"]}>
                 <Layout>
                   <DigitalTwin />
                 </Layout>
@@ -64,9 +68,19 @@ function App() {
             }
           />
           <Route
+            path="/alerts"
+            element={
+              <ProtectedRoute requiredRole={["admin", "agent"]}>
+                <Layout>
+                  <AlertsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/sensors"
             element={
-              <ProtectedRoute requiredRole="admin">
+              <ProtectedRoute requiredRole={["admin", "agent"]}>
                 <Layout>
                   <Sensors />
                 </Layout>
@@ -84,11 +98,32 @@ function App() {
             }
           />
           <Route
-            path="/reports"
+            path="/sensors/:id/edit"
             element={
               <ProtectedRoute requiredRole="admin">
                 <Layout>
+                  <EditSensor />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute requiredRole={["admin", "agent", "chercheur"]}>
+                <Layout>
                   <Reports />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+           <Route
+            path="/prediction"
+            element={
+              <ProtectedRoute requiredRole="chercheur">
+                <Layout>
+                  <PredictionPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -137,7 +172,7 @@ function App() {
           <Route
             path="/settings"
             element={
-              <ProtectedRoute requiredRole={["admin", "user"]}>
+              <ProtectedRoute requiredRole={"admin"}>
                 <Layout>
                   <Settings />
                 </Layout>

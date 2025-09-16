@@ -16,10 +16,18 @@ class Sensor(db.Model):
     min_value = db.Column(db.Float, nullable=True)
     max_value = db.Column(db.Float, nullable=True)
 
+    # ✅ Relation vers SensorData
+    data = db.relationship(
+        "SensorData",
+        back_populates="sensor",
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
 
     def __repr__(self):
         return f"<Sensor {self.name} ({self.type})>"
-def to_dict(self):
+
+    def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,

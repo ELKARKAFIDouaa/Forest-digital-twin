@@ -100,7 +100,7 @@ def list_users():
         "lastname": u.lastname,
         "email": u.email,
         "telephone": u.telephone,
-        "roles": [r.name for r in u.roles]
+        "roles": [u.role] if u.role else []
     } for u in users])
 
 
@@ -153,16 +153,14 @@ def update_user(user_id):
     if data.get("password"):
         user.set_password(data["password"])
 
+    # ✅ Mise à jour du rôle directement dans la colonne
     if "role" in data:
-    # supprimer tous les rôles existants
-     for r in user.roles:
-        RoleService.remove_role_from_user(user.id, r.name)
-    # assigner le nouveau
-    RoleService.assign_role_to_user(user.id, data["role"])
-
+        user.role = data["role"]
 
     db.session.commit()
     return jsonify({"message": "User updated"})
+
+   
 
 
 @admin_bp.route("/users/<int:user_id>", methods=["DELETE"])

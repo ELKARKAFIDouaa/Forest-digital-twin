@@ -94,6 +94,14 @@ export interface Sensor {
   };
   lastReading: SensorReading | null;
 }
+export interface SensorData {
+  id: string;
+  sensorId: string;
+  name: string;
+  value: number;
+  unit: string;
+  timestamp: string;
+}
 
 export interface Report {
   id: string;
@@ -158,4 +166,13 @@ export interface ApiResponse {
   success: boolean;
   message?: string;
   id?: string | number;    // ex: id de l’utilisateur créé
+}
+// alertes
+export interface Alert {
+  id: string;
+  sensorId: string;
+  message: string;
+  severity: 'low' | 'medium' | 'high';
+  createdAt: string;
+  acknowledged: boolean;
 }

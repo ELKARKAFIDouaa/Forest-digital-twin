@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut, LayoutDashboard } from 'lucide-react';
+import { Gauge, Activity, FileText, Users, Settings, TreePine, LogOut, LayoutDashboard, Cpu, Brain } from 'lucide-react';
 
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -9,20 +9,49 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, hasRole } = useAuth();
+  interface SidebarItem {
+  path: string;
+  icon: React.ElementType;
+  label: string;
+}
 
-  // Navigation par défaut
-  const navigationItems = [
-    { path: '/DigitalTwin', icon: TreePine, label: 'Digital Twin' },
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
-    { path: '/users', icon: Users, label: 'Utilisateurs' },
-    { path: '/roles', icon: Activity, label: 'Roles et permissions' },
-    { path: '/sensors', icon: Users, label: 'Capteurs' },
-    { path: '/reports', icon: FileText, label: 'Rapports' },
-    { path: '/settings', icon: Settings, label: 'Paramètres' },
+// Navigation par défaut
+let navigationItems: SidebarItem[] = [
+  { path: '/digitalTwin', icon: TreePine, label: 'Digital Twin' },
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Tableau de bord' },
+  { path: '/reports', icon: FileText, label: 'Rapports' },
+  { path: '/alerts', icon: Activity, label: 'Alertes' },
   ];
 
+  // ✅ Capteurs : admin + agent
+if (hasRole("admin") || hasRole("agent")) {
+  navigationItems = [
+    ...navigationItems,
+    { path: "/sensors", icon: Cpu, label: "Capteurs" },
+  ];
+}
 
+// ✅ Options réservées admin uniquement
+if (hasRole("admin")) {
+  navigationItems = [
+    ...navigationItems,
+    { path: "/users", icon: Users, label: "Utilisateurs" },
+    { path: "/roles", icon: Activity, label: "Rôles et permissions" },
+    { path: "/settings", icon: Settings, label: "Paramètres" },
+  ];
+}
+if (hasRole("chercheur")) {
+  navigationItems = [
+    ...navigationItems,
+    {
+      path: 'http://127.0.0.1:5001/',  
+      icon: Cpu,                      
+      label: 'Prédiction',
+      
+    }
+  ];
+}
   const handleLogout = () => {
     logout();          // clear session/auth
     navigate('/login'); // redirect to login page
@@ -35,12 +64,8 @@ const Sidebar: React.FC = () => {
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <TreePine className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">Forest</h1>
-            <p className="text-sm text-gray-600">Digital Twin</p>
+          <div className="mb-5">
+            <img src="/logo.png" alt="Forest Digital Twin Logo" className="max-w-[100px]" />
           </div>
         </div>
       </div>

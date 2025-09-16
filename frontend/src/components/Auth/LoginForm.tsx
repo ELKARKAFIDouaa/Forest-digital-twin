@@ -21,16 +21,19 @@ const LoginForm: React.FC = () => {
     
     // Redirection basée sur le rôle
     setTimeout(() => {
-      if (user.roles.includes('admin')) {
-        navigate("/dashboard");
-      } else if (user.roles.includes('user')) {
-        navigate("/dashboarduser");
-      } else if (user.roles.includes('agent')) {
-        navigate("/dashboard");
-      } else {
-        navigate("/");
-      }
-    }, 1500);
+  if (user.roles.includes("admin")) {
+    navigate("/dashboard");
+  } else if (user.roles.includes("agent")) {
+    navigate("/dashboard");
+  } else if (user.roles.includes("chercheur")) {
+    navigate("/dashboard");
+  } else if (user.roles.includes("user")) {
+    navigate("/dashboarduser");
+  } else {
+    navigate("/");
+  }
+}, 1500);
+
   } catch (error) {
     console.error("Login failed:", error);
     setMessage("❌ Email ou mot de passe incorrect.");
@@ -48,14 +51,10 @@ const LoginForm: React.FC = () => {
         {/* Left side - Branding */}
         <div className="flex-1 bg-emerald-600 flex flex-col justify-between p-12 text-white">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-              <TreePine className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">Forest</h1>
-              <p className="text-sm opacity-90">Digital Twin</p>
-            </div>
+          <div className="mb-5">
+            <img src="/logo2.png" alt="Forest Digital Twin Logo" className="max-w-[150px]" />
           </div>
+        </div>
 
           <div>
             <h2 className="text-4xl font-bold mb-4 leading-tight">

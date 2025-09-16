@@ -1,4 +1,4 @@
-import { Sensor, SensorReading, CreateSensorData, UpdateSensorData } from '../types';
+import { Sensor, SensorReading, CreateSensorData, UpdateSensorData , SensorData} from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -25,7 +25,8 @@ const mockSensors: Sensor[] = [
       unit: '°C',
       timestamp: new Date().toISOString(),
       quality: 'good'
-    }
+    },
+    zone: ''
   },
   {
     id: '2',
@@ -48,7 +49,8 @@ const mockSensors: Sensor[] = [
       unit: '%',
       timestamp: new Date().toISOString(),
       quality: 'good'
-    }
+    },
+    zone: ''
   }
 ];
 
@@ -78,23 +80,24 @@ const normalizeSensorFromServer = (raw: any): Sensor => ({
   },
   lastReading: raw.lastReading
     ? {
-        id: raw.lastReading.id?.toString(),
-        sensorId: raw.lastReading.sensor_id?.toString(),
-        name: raw.lastReading.name,
-        value: raw.lastReading.value,
-        unit: raw.lastReading.unit,
-        timestamp: raw.lastReading.timestamp,
-        quality: raw.lastReading.quality || 'good',
-      }
+      id: raw.lastReading.id?.toString(),
+      sensorId: raw.lastReading.sensor_id?.toString(),
+      name: raw.lastReading.name,
+      value: raw.lastReading.value,
+      unit: raw.lastReading.unit,
+      timestamp: raw.lastReading.timestamp,
+      quality: raw.lastReading.quality || 'good',
+    }
     : {
-        id: null,
-        sensorId: raw.id?.toString(),
-        name: raw.type,
-        value: null, // pas encore de lecture
-        unit: raw.unit,
-        timestamp: null,
-        quality: 'good',
-      },
+      id: null,
+      sensorId: raw.id?.toString(),
+      name: raw.type,
+      value: null, // pas encore de lecture
+      unit: raw.unit,
+      timestamp: null,
+      quality: 'good',
+    },
+  zone: ''
 });
 
 // Normalize for readings
@@ -236,7 +239,13 @@ export const createReading = async (sensorId: string, readingData: { value: numb
     };
   }
 };
-
+export const getSensorHistory = async (limit: number = 50): Promise<SensorData[]> => {
+  const res = await fetch(`${API_BASE_URL}/sensors/history?limit=${limit}`, {
+    headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+  });
+  if (!res.ok) throw new Error("Erreur récupération historique");
+  return res.json();
+};
 export default {
   getSensors,
   getSensorById,
@@ -245,4 +254,6 @@ export default {
   deleteSensor,
   getSensorReadings,
   createReading,
+  getSensorHistory,
+  
 };

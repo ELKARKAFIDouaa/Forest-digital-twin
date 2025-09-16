@@ -1,44 +1,51 @@
-from flask import Blueprint, make_response, request, jsonify
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.user import User
 from app.models.sensor import Sensor
 from app.models.sensor_data import SensorData
+from app.models.alert import Alert
+from functools import wraps
 
 sensors_bp = Blueprint("sensors", __name__, url_prefix="/api/sensors")
 
-# ----------------------------
-# MIDDLEWARE: Vérifier rôle autorisé (admin ou agent)
-# ----------------------------
-@sensors_bp.before_request
-@jwt_required(optional=True)
-def check_admin_or_options():
-    # Laisser passer OPTIONS pour préflight
-    if request.method == "OPTIONS":
-        resp = make_response()
-        resp.status_code = 200
-        return resp
 
-    # Vérification JWT pour GET/POST/PATCH/DELETE
-    user_id = get_jwt_identity()
-    if not user_id:
-        return jsonify({"error": "Unauthorized"}), 401
+# ----------------------------
+# UTILS: Vérifier rôle autorisé
+# ----------------------------
+def require_roles(*roles):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            user_id = get_jwt_identity()
+            if not user_id:
+                return jsonify({"error": "Unauthorized"}), 401
 
-    user = User.query.get(user_id)
-    if not user or not user.has_role("admin"):
-        return jsonify({"error": "Forbidden"}), 403
+            user = User.query.get(user_id)
+            if not user or not any(user.has_role(r) for r in roles):
+                return jsonify({"error": "Forbidden"}), 403
+
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 # ----------------------------
 # SENSOR CRUD
 # ----------------------------
-
+@sensors_bp.route("", methods=["GET"])
 @sensors_bp.route("/", methods=["GET"])
+@jwt_required()
+@require_roles("admin", "agent")
 def list_sensors():
     sensors = Sensor.query.all()
     result = []
     for s in sensors:
-        last_reading = SensorData.query.filter_by(sensor_id=s.id).order_by(SensorData.timestamp.desc()).first()
+        last_reading = (
+            SensorData.query.filter_by(sensor_id=s.id)
+            .order_by(SensorData.timestamp.desc())
+            .first()
+        )
         result.append({
             "id": s.id,
             "name": s.name,
@@ -61,11 +68,20 @@ def list_sensors():
             } if last_reading else None
         })
     return jsonify(result)
+
+
 @sensors_bp.route("/<int:sensor_id>/readings", methods=["GET"])
+@jwt_required()
+@require_roles("admin", "agent")
 def get_sensor_readings(sensor_id):
     limit = request.args.get("limit", 100, type=int)
     Sensor.query.get_or_404(sensor_id)
-    data = SensorData.query.filter_by(sensor_id=sensor_id).order_by(SensorData.timestamp.desc()).limit(limit).all()
+    data = (
+        SensorData.query.filter_by(sensor_id=sensor_id)
+        .order_by(SensorData.timestamp.desc())
+        .limit(limit)
+        .all()
+    )
     return jsonify([{
         "id": d.id,
         "sensor_id": d.sensor_id,
@@ -76,9 +92,11 @@ def get_sensor_readings(sensor_id):
         "quality": "good",
     } for d in reversed(data)])
 
+
 @sensors_bp.route("/", methods=["POST"])
+@jwt_required()
+@require_roles("admin")
 def create_sensor():
-    """Créer un capteur"""
     data = request.json or {}
     sensor = Sensor(
         name=data.get("name"),
@@ -99,8 +117,9 @@ def create_sensor():
 
 
 @sensors_bp.route("/<int:sensor_id>", methods=["GET"])
+@jwt_required()
+@require_roles("admin", "agent")
 def get_sensor(sensor_id):
-    """Récupérer un capteur par ID"""
     sensor = Sensor.query.get_or_404(sensor_id)
     return jsonify({
         "id": sensor.id,
@@ -118,9 +137,9 @@ def get_sensor(sensor_id):
     })
 
 
-
-
 @sensors_bp.route("/<int:sensor_id>", methods=["PATCH", "PUT"])
+@jwt_required()
+@require_roles("admin")
 def update_sensor(sensor_id):
     sensor = Sensor.query.get_or_404(sensor_id)
     data = request.json or {}
@@ -138,13 +157,13 @@ def update_sensor(sensor_id):
     sensor.max_value = data.get("max_value", sensor.max_value)
 
     db.session.commit()
-
-    # Retourner l’objet sensor comme le frontend attend
     return get_sensor(sensor.id)
 
+
 @sensors_bp.route("/<int:sensor_id>", methods=["DELETE"])
+@jwt_required()
+@require_roles("admin")
 def delete_sensor(sensor_id):
-    """Supprimer un capteur"""
     sensor = Sensor.query.get_or_404(sensor_id)
     db.session.delete(sensor)
     db.session.commit()
@@ -155,8 +174,9 @@ def delete_sensor(sensor_id):
 # SENSOR DATA CRUD
 # ----------------------------
 @sensors_bp.route("/<int:sensor_id>/data", methods=["GET"])
+@jwt_required()
+@require_roles("admin", "agent")
 def get_sensor_data(sensor_id):
-    """Lister toutes les mesures d’un capteur"""
     Sensor.query.get_or_404(sensor_id)
     data = SensorData.query.filter_by(sensor_id=sensor_id).all()
     return jsonify([{
@@ -167,19 +187,40 @@ def get_sensor_data(sensor_id):
 
 
 @sensors_bp.route("/<int:sensor_id>/data", methods=["POST"])
+@jwt_required()
+@require_roles("admin")
 def add_sensor_data(sensor_id):
-    """Ajouter une mesure à un capteur"""
-    Sensor.query.get_or_404(sensor_id)
+    sensor = Sensor.query.get_or_404(sensor_id)
     data = request.json or {}
+
     sensor_data = SensorData(sensor_id=sensor_id, value=data["value"])
     db.session.add(sensor_data)
+
+    # Vérifier seuils
+    if sensor.min_value is not None and sensor_data.value < sensor.min_value:
+        alert = Alert(
+            message=f"Valeur trop basse ({sensor_data.value}{sensor.unit}) pour {sensor.name}",
+            severity="low",
+            sensor_id=sensor_id,
+        )
+        db.session.add(alert)
+
+    if sensor.max_value is not None and sensor_data.value > sensor.max_value:
+        alert = Alert(
+            message=f"Valeur trop élevée ({sensor_data.value}{sensor.unit}) pour {sensor.name}",
+            severity="high",
+            sensor_id=sensor_id,
+        )
+        db.session.add(alert)
+
     db.session.commit()
     return jsonify({"message": "Data added", "id": sensor_data.id}), 201
 
 
 @sensors_bp.route("/data/<int:data_id>", methods=["PUT"])
+@jwt_required()
+@require_roles("admin")
 def update_sensor_data(data_id):
-    """Modifier une mesure"""
     sensor_data = SensorData.query.get_or_404(data_id)
     data = request.json or {}
     sensor_data.value = data.get("value", sensor_data.value)
@@ -188,8 +229,9 @@ def update_sensor_data(data_id):
 
 
 @sensors_bp.route("/data/<int:data_id>", methods=["DELETE"])
+@jwt_required()
+@require_roles("admin")
 def delete_sensor_data(data_id):
-    """Supprimer une mesure"""
     sensor_data = SensorData.query.get_or_404(data_id)
     db.session.delete(sensor_data)
     db.session.commit()
@@ -200,8 +242,9 @@ def delete_sensor_data(data_id):
 # HISTORY
 # ----------------------------
 @sensors_bp.route("/history", methods=["GET"])
+@jwt_required()
+@require_roles("admin", "agent")
 def get_sensor_history():
-    """Retourner l’historique global (N dernières mesures)"""
     limit = request.args.get("limit", default=500, type=int)
     data = SensorData.query.order_by(SensorData.timestamp.desc()).limit(limit).all()
     return jsonify([{

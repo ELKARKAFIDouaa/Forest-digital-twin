@@ -134,7 +134,7 @@ const EditUser: React.FC = () => {
           >
             <option value="admin">Administrateur</option>
             <option value="agent">Agent</option>
-            <option value="viewer">Observateur</option>
+            <option value="chercheur">Chercheur</option>
             <option value="user">Utilisateur</option>
           </select>
         </div>

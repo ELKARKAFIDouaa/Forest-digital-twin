@@ -1,73 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Sensor } from '../types';
-import * as sensorAPI from '../services/sensorAPI';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
-import SensorCard from '../components/Sensors/SensorCard';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Filter, Plus, Edit, Trash } from "lucide-react";
+import SensorCard from "../components/Sensors/SensorCard";
+import { Sensor } from "../types";
+import * as sensorsAPI from "../services/sensorAPI";
+import { useAuth } from "../contexts/AuthContext";
 
 const Sensors: React.FC = () => {
   const [sensors, setSensors] = useState<Sensor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [filteredSensors, setFilteredSensors] = useState<Sensor[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // ---------------- Fetch sensors ----------------
+  const navigate = useNavigate();
+  const { hasRole } = useAuth();
+
   useEffect(() => {
     const fetchSensors = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const sensorsData = await sensorAPI.getSensors();
-        setSensors(sensorsData);
-        setError(null);
-      } catch (err: any) {
-        setError('Erreur lors de la récupération des capteurs.');
+        const data = await sensorsAPI.getSensors();
+        setSensors(data);
+        setFilteredSensors(data);
+      } catch (err) {
+        setError("Impossible de charger les capteurs");
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchSensors();
   }, []);
 
-  // ---------------- Filters ----------------
-  const filteredSensors = sensors.filter(sensor => {
-    const matchesSearch =
-      sensor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (sensor.zone ?? '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || sensor.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  // ---------------- Handlers ----------------
-  const handleDelete = async (sensorId: string) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer ce capteur ?")) return;
-    try {
-      await sensorAPI.deleteSensor(sensorId);
-      setSensors(prev => prev.filter(s => s.id !== sensorId));
-    } catch (err) {
-      alert("Erreur lors de la suppression du capteur.");
+  useEffect(() => {
+    let filtered = [...sensors];
+    if (searchTerm) {
+      filtered = filtered.filter((s) =>
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((s) => s.status === statusFilter);
+    }
+    setFilteredSensors(filtered);
+  }, [searchTerm, statusFilter, sensors]);
+
+  const handleSensorClick = (id: string) => {
+    navigate(`/sensors/${id}`);
   };
 
   const handleEdit = (sensor: Sensor) => {
-    navigate(`/sensors/edit/${sensor.id}`);
+    navigate(`/sensors/${sensor.id}/edit`);
   };
 
-  const handleSensorClick = (sensorId: string) => {
-    navigate(`/sensors/${sensorId}`);
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Voulez-vous vraiment supprimer ce capteur ?")) {
+      try {
+        await sensorsAPI.deleteSensor(id);
+        setSensors(sensors.filter((s) => s.id !== id));
+      } catch {
+        setError("Échec de suppression du capteur");
+      }
+    }
   };
-
-  // ---------------- Render ----------------
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -79,14 +75,17 @@ const Sensors: React.FC = () => {
             Gérez et surveillez tous vos capteurs environnementaux
           </p>
         </div>
-        <button
-  onClick={() => navigate('/sensors/add')}
-  className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
->
-  <Plus className="w-5 h-5" />
-  <span>Ajouter un capteur</span>
-</button>
 
+        {/* Ajouter → réservé à l’admin */}
+        {hasRole("admin") && (
+          <button
+            onClick={() => navigate("/sensors/add")}
+            className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Ajouter un capteur</span>
+          </button>
+        )}
       </div>
 
       {/* Error message */}
@@ -134,30 +133,21 @@ const Sensors: React.FC = () => {
       {/* Sensors grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSensors.map((sensor) => (
-          <div key={sensor.id} className="relative group">
-            <SensorCard sensor={sensor} onClick={() => handleSensorClick(sensor.id)} />
-            <div className="absolute top-2 right-2 hidden group-hover:flex space-x-2">
-              <button
-                onClick={() => handleEdit(sensor)}
-                className="bg-white rounded-full p-2 shadow hover:bg-gray-100"
-              >
-                <Edit className="w-4 h-4 text-blue-500" />
-              </button>
-              <button
-                onClick={() => handleDelete(sensor.id)}
-                className="bg-white rounded-full p-2 shadow hover:bg-gray-100"
-              >
-                <Trash className="w-4 h-4 text-red-500" />
-              </button>
-            </div>
-          </div>
+          <SensorCard
+            key={sensor.id}
+            sensor={sensor}
+            onClick={() => handleSensorClick(sensor.id)}
+            // Admin uniquement pour Edit / Delete
+            onEdit={hasRole("admin") ? () => handleEdit(sensor) : undefined}
+            onDelete={hasRole("admin") ? () => handleDelete(sensor.id) : undefined}
+          />
         ))}
       </div>
 
       {filteredSensors.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <p className="text-gray-500">
-            {searchTerm || statusFilter !== 'all'
+            {searchTerm || statusFilter !== "all"
               ? "Aucun capteur ne correspond à vos critères de recherche"
               : "Aucun capteur n'est configuré pour le moment"}
           </p>

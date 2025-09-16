@@ -61,12 +61,14 @@ def create_app():
     from app.routes.dashboard import dashboard_bp
     from app.routes.dashboarduser import dashboarduser_bp
     from app.routes.sensors import sensors_bp
+    from app.routes.alerts import alerts_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(admin_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(dashboarduser_bp)
     app.register_blueprint(sensors_bp, url_prefix="/api/sensors")
+    app.register_blueprint(alerts_bp, url_prefix="/api/alerts")
 
     # ----------------------------
     # Import Models
@@ -76,6 +78,7 @@ def create_app():
     from app.models.associations import user_roles
     from app.models.sensor import Sensor
     from app.models.sensor_data import SensorData
+    from app.models.alert import Alert
 
     # ----------------------------
     # Import Services
