@@ -98,3 +98,401 @@ Traceback (most recent call last):
          ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 FileNotFoundError: [Errno 2] No such file or directory: 'templates/index.html'
 2025-09-17 14:41:21,517 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-17 14:42:33,216 - INFO - Loading model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-17 14:42:35,849 - INFO - Model loaded: XGBoost
+2025-09-18 09:38:57,229 - INFO - ==================================================
+2025-09-18 09:38:57,233 - INFO - APPLICATION STARTUP
+2025-09-18 09:38:57,234 - INFO - ==================================================
+2025-09-18 09:38:57,234 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 09:38:57,235 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 09:38:57,235 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-18 09:38:57,236 - INFO - ------------------------------
+2025-09-18 09:38:57,236 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-18 09:38:57,237 - INFO - ------------------------------
+2025-09-18 09:38:57,237 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-18 09:38:58,168 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-18 09:38:58,169 - INFO - ------------------------------
+2025-09-18 09:38:58,169 - INFO - LOADING NDVI/ARIMA MODELS
+2025-09-18 09:38:58,170 - INFO - ------------------------------
+2025-09-18 09:38:58,171 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-18 09:38:58,173 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-18 09:38:58,175 - INFO - Scaler X loaded
+2025-09-18 09:38:58,177 - INFO - Scaler Y loaded
+2025-09-18 09:38:58,178 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-18 09:38:58,179 - INFO - NDVI models loading completed successfully
+2025-09-18 09:38:58,180 - INFO - ------------------------------
+2025-09-18 09:38:58,180 - INFO - FINAL MODEL STATUS
+2025-09-18 09:38:58,181 - INFO - ------------------------------
+2025-09-18 09:38:58,245 - INFO - ==================================================
+2025-09-18 09:38:58,246 - INFO - APPLICATION READY
+2025-09-18 09:38:58,247 - INFO - ==================================================
+2025-09-18 17:47:05,306 - INFO - ==================================================
+2025-09-18 17:47:05,308 - INFO - APPLICATION STARTUP - MULTI-YEAR NDVI PREDICTOR
+2025-09-18 17:47:05,308 - INFO - ==================================================
+2025-09-18 17:47:05,308 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 17:47:05,309 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 17:47:05,309 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-18 17:47:05,310 - INFO - ------------------------------
+2025-09-18 17:47:05,310 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-18 17:47:05,311 - INFO - ------------------------------
+2025-09-18 17:47:05,311 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-18 17:47:09,564 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-18 17:47:09,565 - INFO - ------------------------------
+2025-09-18 17:47:09,566 - INFO - LOADING MULTI-YEAR NDVI/ARIMA MODELS
+2025-09-18 17:47:09,566 - INFO - ------------------------------
+2025-09-18 17:47:09,568 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-18 17:47:09,569 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-18 17:47:09,571 - INFO - Scaler X loaded
+2025-09-18 17:47:09,574 - INFO - Scaler Y loaded
+2025-09-18 17:47:09,575 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-18 17:47:09,576 - INFO - NDVI models loading completed successfully
+2025-09-18 17:47:09,577 - INFO - ------------------------------
+2025-09-18 17:47:09,577 - INFO - FINAL MODEL STATUS
+2025-09-18 17:47:09,578 - INFO - ------------------------------
+2025-09-18 17:47:09,629 - INFO - Multi-year NDVI predictions available (1-4 years: 2025-2028)
+2025-09-18 17:47:09,640 - INFO - ==================================================
+2025-09-18 17:47:09,640 - INFO - MULTI-YEAR FOREST HEALTH PREDICTOR READY
+2025-09-18 17:47:09,641 - INFO - Features: Classification + NDVI Multi-Year (1-4 years)
+2025-09-18 17:47:09,641 - INFO - ==================================================
+2025-09-18 17:47:25,833 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 17:47:25,876 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-18 17:47:28,149 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 17:47:28,156 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-18 17:49:04,018 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 17:49:04,024 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-18 17:49:05,534 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 17:49:05,539 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-18 17:49:21,867 - INFO - ==================================================
+2025-09-18 17:49:21,867 - INFO - APPLICATION STARTUP - MULTI-YEAR NDVI PREDICTOR
+2025-09-18 17:49:21,868 - INFO - ==================================================
+2025-09-18 17:49:21,868 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 17:49:21,869 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 17:49:21,870 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-18 17:49:21,870 - INFO - ------------------------------
+2025-09-18 17:49:21,870 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-18 17:49:21,871 - INFO - ------------------------------
+2025-09-18 17:49:21,871 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-18 17:49:22,687 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-18 17:49:22,687 - INFO - ------------------------------
+2025-09-18 17:49:22,688 - INFO - LOADING MULTI-YEAR NDVI/ARIMA MODELS
+2025-09-18 17:49:22,688 - INFO - ------------------------------
+2025-09-18 17:49:22,690 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-18 17:49:22,691 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-18 17:49:22,693 - INFO - Scaler X loaded
+2025-09-18 17:49:22,695 - INFO - Scaler Y loaded
+2025-09-18 17:49:22,697 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-18 17:49:22,697 - INFO - NDVI models loading completed successfully
+2025-09-18 17:49:22,698 - INFO - ------------------------------
+2025-09-18 17:49:22,699 - INFO - FINAL MODEL STATUS
+2025-09-18 17:49:22,700 - INFO - ------------------------------
+2025-09-18 17:49:22,721 - INFO - Multi-year NDVI predictions available (1-4 years: 2025-2028)
+2025-09-18 17:49:22,735 - INFO - ==================================================
+2025-09-18 17:49:22,736 - INFO - MULTI-YEAR FOREST HEALTH PREDICTOR READY
+2025-09-18 17:49:22,736 - INFO - Features: Classification + NDVI Multi-Year (1-4 years)
+2025-09-18 17:49:22,737 - INFO - ==================================================
+2025-09-18 17:49:34,901 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 17:49:34,916 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-18 23:50:59,375 - INFO - ==================================================
+2025-09-18 23:50:59,380 - INFO - APPLICATION STARTUP - MULTI-YEAR NDVI PREDICTOR
+2025-09-18 23:50:59,380 - INFO - ==================================================
+2025-09-18 23:50:59,381 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 23:50:59,381 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-18 23:50:59,382 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-18 23:50:59,383 - INFO - ------------------------------
+2025-09-18 23:50:59,383 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-18 23:50:59,385 - INFO - ------------------------------
+2025-09-18 23:50:59,387 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-18 23:51:03,684 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-18 23:51:03,685 - INFO - ------------------------------
+2025-09-18 23:51:03,686 - INFO - LOADING MULTI-YEAR NDVI/ARIMA MODELS
+2025-09-18 23:51:03,687 - INFO - ------------------------------
+2025-09-18 23:51:03,688 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-18 23:51:03,690 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-18 23:51:03,693 - INFO - Scaler X loaded
+2025-09-18 23:51:03,695 - INFO - Scaler Y loaded
+2025-09-18 23:51:03,697 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-18 23:51:03,697 - INFO - NDVI models loading completed successfully
+2025-09-18 23:51:03,698 - INFO - ------------------------------
+2025-09-18 23:51:03,699 - INFO - FINAL MODEL STATUS
+2025-09-18 23:51:03,703 - INFO - ------------------------------
+2025-09-18 23:51:03,789 - INFO - Multi-year NDVI predictions available (1-4 years: 2025-2028)
+2025-09-18 23:51:03,815 - INFO - ==================================================
+2025-09-18 23:51:03,816 - INFO - MULTI-YEAR FOREST HEALTH PREDICTOR READY
+2025-09-18 23:51:03,818 - INFO - Features: Classification + NDVI Multi-Year (1-4 years)
+2025-09-18 23:51:03,819 - INFO - ==================================================
+2025-09-18 23:52:07,521 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-18 23:52:07,578 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:05:25,165 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:05:25,221 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:05:27,938 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:05:27,960 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:06:42,382 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:06:42,390 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:13:04,092 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    # Specify UTF-8 encoding when reading the HTML file
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:13:04,218 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:13:05,010 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    # Specify UTF-8 encoding when reading the HTML file
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:13:05,026 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:14:11,883 - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Dell\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\routes.py", line 26, in index
+    with open('index.html', 'r', encoding='utf-8') as f:
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'index.html'
+2025-09-19 00:14:11,917 - ERROR - Internal error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2025-09-19 00:14:49,205 - INFO - ==================================================
+2025-09-19 00:14:49,205 - INFO - APPLICATION STARTUP - MULTI-YEAR NDVI PREDICTOR
+2025-09-19 00:14:49,206 - INFO - ==================================================
+2025-09-19 00:14:49,206 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-19 00:14:49,207 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-19 00:14:49,208 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-19 00:14:49,208 - INFO - ------------------------------
+2025-09-19 00:14:49,208 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-19 00:14:49,209 - INFO - ------------------------------
+2025-09-19 00:14:49,211 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-19 00:14:50,050 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-19 00:14:50,051 - INFO - ------------------------------
+2025-09-19 00:14:50,052 - INFO - LOADING MULTI-YEAR NDVI/ARIMA MODELS
+2025-09-19 00:14:50,052 - INFO - ------------------------------
+2025-09-19 00:14:50,054 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-19 00:14:50,055 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-19 00:14:50,059 - INFO - Scaler X loaded
+2025-09-19 00:14:50,061 - INFO - Scaler Y loaded
+2025-09-19 00:14:50,063 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-19 00:14:50,063 - INFO - NDVI models loading completed successfully
+2025-09-19 00:14:50,064 - INFO - ------------------------------
+2025-09-19 00:14:50,064 - INFO - FINAL MODEL STATUS
+2025-09-19 00:14:50,065 - INFO - ------------------------------
+2025-09-19 00:14:50,066 - INFO - Classification model: LOADED
+2025-09-19 00:14:50,066 - INFO - Multi-year NDVI/ARIMA model: LOADED
+2025-09-19 00:14:50,067 - INFO - Multi-year NDVI predictions available (1-4 years: 2025-2028)
+2025-09-19 00:14:50,080 - INFO - ==================================================
+2025-09-19 00:14:50,081 - INFO - MULTI-YEAR FOREST HEALTH PREDICTOR READY
+2025-09-19 00:14:50,082 - INFO - Features: Classification + NDVI Multi-Year (1-4 years)
+2025-09-19 00:14:50,083 - INFO - ==================================================
+2025-09-19 00:15:56,449 - INFO - ==================================================
+2025-09-19 00:15:56,450 - INFO - APPLICATION STARTUP - MULTI-YEAR NDVI PREDICTOR
+2025-09-19 00:15:56,450 - INFO - ==================================================
+2025-09-19 00:15:56,451 - INFO - Base directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-19 00:15:56,451 - INFO - Current working directory: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest
+2025-09-19 00:15:56,452 - INFO - PKL files found (9): ['best_forest_model.pkl', 'best_model_info.pkl', 'best_ndvi_model_arima.pkl', 'feature_selector.pkl', 'forest_model_complete.pkl', 'label_encoder.pkl', 'scaler.pkl', 'scaler_X.pkl', 'scaler_y.pkl']
+2025-09-19 00:15:56,452 - INFO - ------------------------------
+2025-09-19 00:15:56,453 - INFO - LOADING CLASSIFICATION MODEL
+2025-09-19 00:15:56,454 - INFO - ------------------------------
+2025-09-19 00:15:56,454 - INFO - Loading classification model from: C:\Users\Dell\Desktop\Data Science Taskes\Forest-digital-twin\ML Forest\forest_model_complete.pkl
+2025-09-19 00:15:57,194 - INFO - Classification model loaded: XGBoost with 71 features
+2025-09-19 00:15:57,194 - INFO - ------------------------------
+2025-09-19 00:15:57,195 - INFO - LOADING MULTI-YEAR NDVI/ARIMA MODELS
+2025-09-19 00:15:57,195 - INFO - ------------------------------
+2025-09-19 00:15:57,197 - INFO - ARIMA config loaded: {'model_type': 'ARIMA', 'order': (1, 1, 1)}
+2025-09-19 00:15:57,198 - INFO - Added metrics from model info: RMSE=0.019235252564093412, MAE=0.014881666227610911
+2025-09-19 00:15:57,200 - INFO - Scaler X loaded
+2025-09-19 00:15:57,202 - INFO - Scaler Y loaded
+2025-09-19 00:15:57,203 - INFO - Model info loaded: {'model_name': 'ARIMA', 'rmse': np.float64(0.019235252564093412), 'mae': 0.014881666227610911}
+2025-09-19 00:15:57,204 - INFO - NDVI models loading completed successfully
+2025-09-19 00:15:57,204 - INFO - ------------------------------
+2025-09-19 00:15:57,205 - INFO - FINAL MODEL STATUS
+2025-09-19 00:15:57,206 - INFO - ------------------------------
+2025-09-19 00:15:57,206 - INFO - Classification model: LOADED
+2025-09-19 00:15:57,207 - INFO - Multi-year NDVI/ARIMA model: LOADED
+2025-09-19 00:15:57,207 - INFO - Multi-year NDVI predictions available (1-4 years: 2025-2028)
+2025-09-19 00:15:57,220 - INFO - ==================================================
+2025-09-19 00:15:57,220 - INFO - MULTI-YEAR FOREST HEALTH PREDICTOR READY
+2025-09-19 00:15:57,221 - INFO - Features: Classification + NDVI Multi-Year (1-4 years)
+2025-09-19 00:15:57,222 - INFO - ==================================================

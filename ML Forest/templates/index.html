@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forest Health Predictor - Système de Prédiction</title>
-    <style>
+   <style>
         * {
             margin: 0;
             padding: 0;
@@ -94,6 +94,58 @@
             box-shadow: 0 0 10px rgba(211, 47, 47, 0.6);
         }
 
+        .model-selector {
+            background: rgba(232, 245, 233, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(46, 125, 50, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .model-selector h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .model-options {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .model-option {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            background: rgba(200, 230, 201, 0.3);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .model-option:hover {
+            background: rgba(200, 230, 201, 0.5);
+            border-color: #4caf50;
+        }
+
+        .model-option.selected {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4caf50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .model-option h4 {
+            color: #1b5e20;
+            margin-bottom: 8px;
+        }
+
+        .model-option p {
+            color: #2e7d32;
+            font-size: 0.9em;
+        }
+
         .main-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -147,7 +199,60 @@
             box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
             background: white;
         }
+.years-selector {
+    background: rgba(139, 195, 74, 0.1);
+    border: 2px solid rgba(139, 195, 74, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
 
+.years-selector label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.years-info {
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+    color: #2e7d32;
+    font-size: 0.9em;
+}
+
+.multi-year-predictions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.year-prediction {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    border: 2px solid rgba(76, 175, 80, 0.3);
+    text-align: center;
+}
+
+.year-prediction.future {
+    border-color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+}
+
+.year-title {
+    font-weight: bold;
+    color: #2e7d32;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.year-title.future {
+    color: #ff6b35;
+}
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -183,6 +288,12 @@
         .feature-input input:focus {
             border-color: #4caf50;
             box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .ndvi-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
         }
 
         .btn {
@@ -300,6 +411,21 @@
             border-radius: 4px;
             border: 1px solid rgba(76, 175, 80, 0.2);
             color: #2e7d32;
+        }
+
+        .ndvi-result {
+            background: linear-gradient(135deg, rgba(139, 195, 74, 0.2), rgba(104, 159, 56, 0.2));
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #8bc34a;
+        }
+
+        .ndvi-chart {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
         }
 
         .statistics-card {
@@ -471,7 +597,6 @@
             }
         }
 
-        /* Scrollbar styling for webkit browsers */
         .features-grid::-webkit-scrollbar {
             width: 8px;
         }
@@ -513,7 +638,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌲 Forest Health Predictor</h1>
+            <h1>Forest Health Predictor</h1>
             <p>Système avancé de prédiction de santé forestière</p>
         </div>
 
@@ -523,16 +648,33 @@
                 <span id="statusText">Connexion en cours...</span>
             </div>
             <div>
-                <span id="modelInfo" style="color: #2e7d32; font-weight: 500;">Modèle: --</span>
+                <span id="modelInfo" style="color: #2e7d32; font-weight: 500;">Modèles: --</span>
             </div>
         </div>
 
         <div id="alertContainer"></div>
 
+        <!-- Sélecteur de modèle -->
+        <div class="model-selector">
+            <h3> Sélectionner le modèle de prédiction</h3>
+            <div class="model-options">
+                <div class="model-option selected" onclick="selectModel('classification')" id="classificationOption">
+                    <h4> Classification Forestière</h4>
+                    <p>Modèle de classification multi-classes pour évaluer la santé globale des forêts basé sur de multiples indicateurs environnementaux.</p>
+                    <small style="color: #558b2f;">Classes: Critical, Poor, Fair, Good, Excellent</small>
+                </div>
+                <div class="model-option" onclick="selectModel('ndvi')" id="ndviOption">
+                    <h4>Série Temporelle NDVI</h4>
+                    <p>Modèle ARIMA pour prédire les valeurs NDVI  basé sur l'historique 2020-2024.</p>
+                    <small style="color: #558b2f;">RMSE: 0.0192, MAE: 0.0149</small>
+                </div>
+            </div>
+        </div>
+
         <div class="main-content">
-            <!-- Prédiction manuelle -->
-            <div class="card">
-                <h2>📝 Prédiction Manuelle</h2>
+            <!-- Prédiction manuelle - Classification -->
+            <div class="card" id="manualClassificationCard">
+                <h2>Prédiction Manuelle - Classification</h2>
                 <div id="manualFeatures" class="features-grid">
                     <div class="loading active">
                         <div class="spinner"></div>
@@ -541,27 +683,78 @@
                 </div>
                 <div class="button-group">
                     <button class="btn btn-warning" onclick="generateRandomValues()">
-                        🎲 Générer Valeurs
+                         Générer Valeurs
                     </button>
                     <button class="btn btn-primary" onclick="predictManual()">
-                        🔮 Prédire
+                        Prédire
                     </button>
                 </div>
             </div>
 
+            <!-- Prédiction manuelle - NDVI -->
+            <div class="card" id="manualNDVICard" style="display: none;">
+    <h2> Prédiction NDVI Multi-Années</h2>
+    
+    <!-- Sélecteur du nombre d'années -->
+    <div class="years-selector">
+        <label for="yearsAhead">Nombre d'années à prédire</label>
+        <select id="yearsAhead" onchange="updateYearLabels()">
+            <option value="1">1 année (2025)</option>
+            <option value="2">2 années (2025-2026)</option>
+            <option value="3">3 années (2025-2027)</option>
+            <option value="4">4 années (2025-2028)</option>
+        </select>
+        <div class="years-info" id="yearsInfo">
+            Prédiction pour 2025 basée sur les données historiques 2020-2024
+        </div>
+    </div>
+    
+    <div class="ndvi-inputs">
+        <div class="feature-input">
+            <label for="ndvi_2020">NDVI 2020</label>
+            <input type="number" id="ndvi_2020" step="0.0001" value="0.3" min="0" max="1">
+        </div>
+        <div class="feature-input">
+            <label for="ndvi_2021">NDVI 2021</label>
+            <input type="number" id="ndvi_2021" step="0.0001" value="0.32" min="0" max="1">
+        </div>
+        <div class="feature-input">
+            <label for="ndvi_2022">NDVI 2022</label>
+            <input type="number" id="ndvi_2022" step="0.0001" value="0.31" min="0" max="1">
+        </div>
+        <div class="feature-input">
+            <label for="ndvi_2023">NDVI 2023</label>
+            <input type="number" id="ndvi_2023" step="0.0001" value="0.33" min="0" max="1">
+        </div>
+        <div class="feature-input">
+            <label for="ndvi_2024">NDVI 2024</label>
+            <input type="number" id="ndvi_2024" step="0.0001" value="0.34" min="0" max="1">
+        </div>
+    </div>
+    
+    <div class="button-group">
+        <button class="btn btn-warning" onclick="generateNDVIValues()">
+             Générer Série
+        </button>
+        <button class="btn btn-primary" onclick="predictNDVI()">
+            <span id="predictButtonText">Prédire 2025</span>
+        </button>
+    </div>
+</div>
+
             <!-- Upload de fichier -->
             <div class="card">
-                <h2>📁 Upload de Fichier</h2>
+                <h2>Upload de Fichier</h2>
                 <div class="input-group">
                     <label for="fileUpload">Sélectionner un fichier (CSV, Excel, TXT)</label>
                     <input type="file" id="fileUpload" accept=".csv,.xlsx,.xls,.txt">
                 </div>
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="downloadTemplate()">
-                        📥 Télécharger Template
+                        Télécharger Template
                     </button>
                     <button class="btn btn-primary" onclick="predictFile()">
-                        📊 Analyser Fichier
+                        Analyser Fichier
                     </button>
                 </div>
                 <div id="fileInfo" style="margin-top: 15px; display: none;">
@@ -572,10 +765,19 @@
                 </div>
             </div>
         </div>
-
+<!-- Sélecteur d'années pour les fichiers NDVI -->
+<div class="input-group" id="fileYearsSelector" style="display: none;">
+    <label for="fileYearsAhead">Nombre d'années Ã  prédire (pour NDVI)</label>
+    <select id="fileYearsAhead">
+        <option value="1">1 année (2025)</option>
+        <option value="2">2 années (2025-2026)</option>
+        <option value="3">3 années (2025-2027)</option>
+        <option value="4">4 années (2025-2028)</option>
+    </select>
+</div>
         <!-- Section des résultats -->
         <div class="results-section" id="resultsSection" style="display: none;">
-            <h2>📈 Résultats de Prédiction</h2>
+            <h2>Résultats de Prédiction</h2>
             
             <div id="loadingResults" class="loading">
                 <div class="spinner"></div>
@@ -590,13 +792,13 @@
 
             <div class="button-group" style="margin-top: 20px;">
                 <button class="btn btn-success" onclick="exportResults('csv')">
-                    💾 Exporter CSV
+                    Exporter CSV
                 </button>
                 <button class="btn btn-success" onclick="exportResults('json')">
-                    📋 Exporter JSON
+                    Exporter JSON
                 </button>
                 <button class="btn btn-secondary" onclick="clearResults()">
-                    🗑️ Effacer
+                     Effacer
                 </button>
             </div>
         </div>
@@ -606,13 +808,53 @@
         const API_URL = 'http://localhost:5001';
         let modelFeatures = [];
         let currentPredictions = [];
+        let currentModelType = 'classification';
+        let currentYearsAhead = 1;
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             checkServerStatus();
-            loadModelInfo();
+            loadModelInfo('classification');
         });
 
+        // Sélectionner un modèle
+        function selectModel(modelType) {
+            currentModelType = modelType;
+            
+            // Mettre Ã  jour l'interface visuelle
+            document.querySelectorAll('.model-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            if (modelType === 'classification') {
+    document.getElementById('classificationOption').classList.add('selected');
+    document.getElementById('manualClassificationCard').style.display = 'block';
+    document.getElementById('manualNDVICard').style.display = 'none';
+    document.getElementById('fileYearsSelector').style.display = 'none';
+} else {
+    document.getElementById('ndviOption').classList.add('selected');
+    document.getElementById('manualClassificationCard').style.display = 'none';
+    document.getElementById('manualNDVICard').style.display = 'block';
+    document.getElementById('fileYearsSelector').style.display = 'block';
+}
+            
+            // Charger les informations du modèle sélectionné
+            loadModelInfo(modelType);
+            clearResults();
+        }
+function updateYearLabels() {
+    const yearsAhead = parseInt(document.getElementById('yearsAhead').value);
+    currentYearsAhead = yearsAhead;
+    
+    const yearsInfo = document.getElementById('yearsInfo');
+    const predictButton = document.getElementById('predictButtonText');
+    
+    let endYear = 2024 + yearsAhead;
+    let yearRange = yearsAhead === 1 ? '2025' : `2025-${endYear}`;
+    
+    yearsInfo.textContent = `Prédiction pour ${yearRange} basée sur les données historiques 2020-2024`;
+    predictButton.textContent = yearsAhead === 1 ? 'Prédire 2025' : `Prédire ${yearRange}`;
+}
         // Vérifier le statut du serveur
         async function checkServerStatus() {
             try {
@@ -626,7 +868,13 @@
                     statusDot.classList.remove('offline');
                     statusDot.classList.add('online');
                     statusText.textContent = 'Serveur en ligne';
-                    document.getElementById('modelInfo').textContent = `Modèle: ${data.model_name || 'Non chargé'}`;
+                    
+                    let modelStatus = [];
+                    if (data.classification_model_loaded) modelStatus.push('Classification');
+                    if (data.arima_model_loaded) modelStatus.push('ARIMA');
+                    
+                    document.getElementById('modelInfo').textContent = 
+                        modelStatus.length > 0 ? `Modèles: ${modelStatus.join(', ')}` : 'Aucun modèle';
                 } else {
                     throw new Error('Server unhealthy');
                 }
@@ -641,23 +889,27 @@
         }
 
         // Charger les informations du modèle
-        async function loadModelInfo() {
+        async function loadModelInfo(modelType) {
             try {
-                const response = await fetch(`${API_URL}/model/info`);
+                const response = await fetch(`${API_URL}/model/info?type=${modelType}`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    modelFeatures = data.all_features;
-                    displayManualFeatures();
-                    showAlert(`Modèle ${data.model_name} chargé avec ${data.total_features_count} features`, 'success');
+                    if (modelType === 'classification') {
+                        modelFeatures = data.all_features;
+                        displayManualFeatures();
+                        showAlert(`Modèle ${data.model_name} chargé avec ${data.total_features_count} features`, 'success');
+                    } else {
+                        showAlert(`Modèle ARIMA chargé - RMSE: ${data.model_config.rmse}`, 'success');
+                    }
                 }
             } catch (error) {
                 console.error('Erreur lors du chargement du modèle:', error);
-                showAlert('Erreur lors du chargement du modèle', 'error');
+                showAlert(`Erreur lors du chargement du modèle ${modelType}`, 'error');
             }
         }
 
-        // Afficher les champs de features pour la saisie manuelle
+        // Afficher les champs de features pour la saisie manuelle (Classification)
         function displayManualFeatures() {
             const container = document.getElementById('manualFeatures');
             container.innerHTML = '';
@@ -673,7 +925,7 @@
             });
         }
 
-        // Générer des valeurs aléatoires
+        // Générer des valeurs aléatoires (Classification)
         function generateRandomValues() {
             modelFeatures.forEach(feature => {
                 const input = document.getElementById(`feature_${feature}`);
@@ -684,9 +936,27 @@
             showAlert('Valeurs aléatoires générées', 'info');
         }
 
-        // Prédiction manuelle
+        // Générer des valeurs NDVI
+        function generateNDVIValues() {
+            const baseValue = 0.2 + Math.random() * 0.3; // Entre 0.2 et 0.5
+            const variation = 0.05;
+            
+            for (let year = 2020; year <= 2024; year++) {
+                const input = document.getElementById(`ndvi_${year}`);
+                if (input) {
+                    const value = baseValue + (Math.random() - 0.5) * variation;
+                    input.value = Math.max(0, Math.min(1, value)).toFixed(4);
+                }
+            }
+            showAlert('Série temporelle NDVI générée', 'info');
+        }
+
+        // Prédiction manuelle (Classification)
         async function predictManual() {
-            const data = {};
+            const data = {
+                model_type: 'classification'
+            };
+            
             modelFeatures.forEach(feature => {
                 const input = document.getElementById(`feature_${feature}`);
                 if (input) {
@@ -708,8 +978,8 @@
                 
                 if (result.success) {
                     currentPredictions = [result.prediction];
-                    displaySinglePrediction(result.prediction);
-                    showAlert('Prédiction effectuée avec succès', 'success');
+                    displaySinglePrediction(result.prediction, 'classification');
+                    showAlert('Prediction effectuée avec succès', 'success');
                 } else {
                     showAlert(result.message || 'Erreur lors de la prédiction', 'error');
                 }
@@ -721,18 +991,64 @@
             }
         }
 
+        // Prédiction NDVI
+        // Prédiction NDVI
+        async function predictNDVI() {
+            const yearsAhead = parseInt(document.getElementById('yearsAhead').value);
+            const data = {
+                model_type: 'ndvi',
+                years_ahead: yearsAhead
+            };
+            
+            for (let year = 2020; year <= 2024; year++) {
+                const input = document.getElementById(`ndvi_${year}`);
+                if (input) {
+                    data[`NDVI_${year}`] = parseFloat(input.value) || 0;
+                }
+            }
+
+            try {
+                showLoading('resultsSection', true);
+                const response = await fetch(`${API_URL}/predict/single`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentPredictions = [result.prediction];
+                    displayNDVIPrediction(result.prediction, yearsAhead);
+                    const endYear = 2024 + yearsAhead;
+                    const yearText = yearsAhead === 1 ? '2025' : `2025-${endYear}`;
+                    showAlert(`Prédiction NDVI pour ${yearText} effectuée`, 'success');
+                } else {
+                    showAlert(result.message || 'Erreur lors de la prédiction NDVI', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('Erreur lors de la prédiction NDVI', 'error');
+            } finally {
+                showLoading('resultsSection', false);
+            }
+        }
+
         // Prédiction par fichier
         async function predictFile() {
             const fileInput = document.getElementById('fileUpload');
             const file = fileInput.files[0];
             
-            if (!file) {
-                showAlert('Veuillez sélectionner un fichier', 'error');
-                return;
+            if (currentModelType === 'ndvi') {
+                const fileYearsAhead = document.getElementById('fileYearsAhead').value;
+                formData.append('years_ahead', fileYearsAhead);
             }
 
             const formData = new FormData();
             formData.append('file', file);
+            formData.append('model_type', currentModelType);
 
             try {
                 showLoading('resultsSection', true);
@@ -745,12 +1061,18 @@
                 
                 if (result.success) {
                     currentPredictions = result.predictions;
-                    displayBatchPredictions(result);
+                    
+                    if (result.model_type === 'ndvi') {
+                        displayNDVIBatchPredictions(result);
+                    } else {
+                        displayBatchPredictions(result);
+                    }
+
                     showAlert(`${result.predictions.length} prédictions effectuées`, 'success');
                 } else {
                     showAlert(result.message || 'Erreur lors de l\'analyse', 'error');
-                    if (result.missing_features) {
-                        console.error('Features manquantes:', result.missing_features);
+                    if (result.missing_features || result.missing_columns) {
+                        console.error('Features manquantes:', result.missing_features || result.missing_columns);
                     }
                 }
             } catch (error) {
@@ -761,44 +1083,276 @@
             }
         }
 
-        // Afficher une prédiction unique
-        function displaySinglePrediction(prediction) {
+        // Afficher une prédiction unique (Classification)
+        function displaySinglePrediction(prediction, type) {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.style.display = 'block';
             
             const container = document.getElementById('predictionsContainer');
-            container.innerHTML = `
-                <div class="prediction-result">
-                    <div class="prediction-header">
-                        <span class="prediction-class">${prediction.predicted_class}</span>
-                        <span class="confidence-badge">Confiance: ${(prediction.confidence * 100).toFixed(1)}%</span>
-                    </div>
-                    <div class="probabilities">
-                        ${Object.entries(prediction.probabilities).map(([cls, prob]) => `
-                            <div class="probability-item">
-                                <span>${cls}:</span>
-                                <strong>${(prob * 100).toFixed(1)}%</strong>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
             
-            // Clear statistics and recommendations for single prediction
+            if (type === 'classification') {
+                container.innerHTML = `
+                    <div class="prediction-result">
+                        <div class="prediction-header">
+                            <span class="prediction-class">${prediction.predicted_class}</span>
+                            <span class="confidence-badge">Confiance: ${(prediction.confidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="probabilities">
+                            ${Object.entries(prediction.probabilities).map(([cls, prob]) => `
+                                <div class="probability-item">
+                                    <span>${cls}:</span>
+                                    <strong>${(prob * 100).toFixed(1)}%</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
             document.getElementById('statisticsContainer').innerHTML = '';
             document.getElementById('recommendationsContainer').innerHTML = '';
         }
 
-        // Afficher les prédictions en batch (toutes en même temps)
+       // Afficher une prédiction NDVI
+        function displayNDVIPrediction(prediction, yearsAhead) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            const container = document.getElementById('predictionsContainer');
+            
+            // Vérifier si c'est une prédiction multi-années
+            if (prediction.predictions_by_year) {
+                // Format multi-années
+                const years = Object.keys(prediction.predictions_by_year).sort();
+                const yearRange = years.length === 1 ? years[0] : `${years[0]}-${years[years.length - 1]}`;
+                
+                container.innerHTML = `
+                    <div class="ndvi-result">
+                        <h3 style="color: #1b5e20;">Prédiction NDVI ${yearRange}</h3>
+                        
+                        <!-- Prédictions par année -->
+                        <div class="multi-year-predictions">
+                            ${years.map(year => {
+                                const yearData = prediction.predictions_by_year[year];
+                                return `
+                                    <div class="year-prediction">
+                                        <div class="year-title">${year}</div>
+                                        <div style="color: #2e7d32; font-size: 1.2em; font-weight: bold;">
+                                            ${yearData.prediction.toFixed(4)}
+                                        </div>
+                                        <div style="color: ${getHealthStatusColor(yearData.health_status)}; margin: 5px 0;">
+                                            ${yearData.health_status}
+                                        </div>
+                                        <div style="font-size: 0.85em; color: #666;">
+                                            IC: [${yearData.confidence_interval.lower.toFixed(3)}, ${yearData.confidence_interval.upper.toFixed(3)}]
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <!-- Informations globales -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                            <div>
+                                <strong>Tendance globale:</strong> ${prediction.trend}
+                            </div>
+                            <div>
+                                <strong>NDVI moyen prédit:</strong> ${prediction.average_prediction.toFixed(4)}
+                            </div>
+                            <div>
+                                <strong>Statut global:</strong> ${prediction.overall_health_status}
+                            </div>
+                        </div>
+                        
+                        <!-- Graphique évolution -->
+                        <div class="ndvi-chart">
+                            <h4>Évolution historique et prédictions</h4>
+                            <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 150px; margin-top: 10px;">
+                                ${Object.entries(prediction.historical_values).map(([year, value]) => `
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <div style="background: linear-gradient(to top, #4caf50, #8bc34a); width: 35px; height: ${value * 150}px; border-radius: 4px 4px 0 0;"></div>
+                                        <small style="margin-top: 5px;">${year}</small>
+                                        <small style="color: #666;">${value.toFixed(3)}</small>
+                                    </div>
+                                `).join('')}
+                                ${years.map(year => {
+                                    const yearData = prediction.predictions_by_year[year];
+                                    return `
+                                        <div style="display: flex; flex-direction: column; align-items: center;">
+                                            <div style="background: linear-gradient(to top, #ff9800, #ffc107); width: 35px; height: ${yearData.prediction * 150}px; border-radius: 4px 4px 0 0; border: 2px dashed #ff6b35;"></div>
+                                            <small style="margin-top: 5px; color: #ff6b35;">${year}</small>
+                                            <small style="color: #ff6b35; font-weight: bold;">${yearData.prediction.toFixed(3)}</small>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(139, 195, 74, 0.1); border-radius: 8px;">
+                            <strong>Modèle utilisé:</strong> ${prediction.model_info.type} ${JSON.stringify(prediction.model_info.order)}<br>
+                            <strong>Performance:</strong> RMSE = ${prediction.model_info.rmse.toFixed(4)}, MAE = ${prediction.model_info.mae.toFixed(4)}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Format legacy pour une seule année
+                container.innerHTML = `
+                    <div class="ndvi-result">
+                        <h3 style="color: #1b5e20;">Prédiction NDVI 2025</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                            <div>
+                                <strong>Valeur prédite:</strong> ${prediction.prediction_2025.toFixed(4)}
+                            </div>
+                            <div>
+                                <strong>Statut de santé:</strong> ${prediction.health_status}
+                            </div>
+                            <div>
+                                <strong>Tendance:</strong> ${prediction.trend}
+                            </div>
+                            <div>
+                                <strong>Intervalle de confiance:</strong> [${prediction.confidence_interval.lower.toFixed(4)}, ${prediction.confidence_interval.upper.toFixed(4)}]
+                            </div>
+                        </div>
+                        <div class="ndvi-chart">
+                            <h4>Évolution historique</h4>
+                            <div style="display: flex; justify-content: space-around; align-items: flex-end; height: 150px; margin-top: 10px;">
+                                ${Object.entries(prediction.historical_values).map(([year, value]) => `
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <div style="background: linear-gradient(to top, #4caf50, #8bc34a); width: 40px; height: ${value * 150}px; border-radius: 4px 4px 0 0;"></div>
+                                        <small style="margin-top: 5px;">${year}</small>
+                                        <small style="color: #666;">${value.toFixed(3)}</small>
+                                    </div>
+                                `).join('')}
+                                <div style="display: flex; flex-direction: column; align-items: center;">
+                                    <div style="background: linear-gradient(to top, #ff9800, #ffc107); width: 40px; height: ${prediction.prediction_2025 * 150}px; border-radius: 4px 4px 0 0; border: 2px dashed #ff6b35;"></div>
+                                    <small style="margin-top: 5px;">2025</small>
+                                    <small style="color: #ff6b35; font-weight: bold;">${prediction.prediction_2025.toFixed(3)}</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(139, 195, 74, 0.1); border-radius: 8px;">
+                            <strong>Modèle utilisé:</strong> ${prediction.model_info.type} ${JSON.stringify(prediction.model_info.order)}<br>
+                            <strong>Performance:</strong> RMSE = ${prediction.model_info.rmse.toFixed(4)}, MAE = ${prediction.model_info.mae.toFixed(4)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('statisticsContainer').innerHTML = '';
+            document.getElementById('recommendationsContainer').innerHTML = '';
+        }
+        
+        // Fonction helper pour obtenir la couleur du statut
+        function getHealthStatusColor(status) {
+            switch(status) {
+                case 'Excellent': return '#2e7d32';
+                case 'Good': return '#4caf50';
+                case 'Fair': return '#ff9800';
+                case 'Poor': return '#ff5722';
+                case 'Critical': return '#c62828';
+                default: return '#666';
+            }
+        }
+
+        // Afficher les prédictions NDVI en batch
+        function displayNDVIBatchPredictions(result) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            const predictionsContainer = document.getElementById('predictionsContainer');
+            predictionsContainer.innerHTML = '<h3 style="color: #2e7d32;">Prédictions NDVI 2025:</h3>';
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-indicator';
+            loadingIndicator.innerHTML = 'Chargement des prédictions...';
+            predictionsContainer.appendChild(loadingIndicator);
+
+            const displayLimit = Math.min(result.predictions.length, 50);
+            const predictionsToShow = result.predictions.slice(0, displayLimit);
+            
+            predictionsToShow.forEach((pred, index) => {
+                if (pred.success) {
+                    const predDiv = document.createElement('div');
+                    predDiv.className = 'ndvi-result';
+                    predDiv.style.marginBottom = '10px';
+                    predDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Point ${pred.row_id + 1}:</strong> NDVI 2025 = ${pred.prediction_2025.toFixed(4)}</span>
+                            <span style="color: ${pred.health_status === 'Excellent' ? '#2e7d32' : pred.health_status === 'Critical' ? '#c62828' : '#ff9800'};">
+                                ${pred.health_status} | ${pred.trend}
+                            </span>
+                        </div>
+                    `;
+                    predictionsContainer.appendChild(predDiv);
+                }
+            });
+            
+            if (result.predictions.length > displayLimit) {
+                predictionsContainer.innerHTML += `
+                    <div class="alert alert-info show">
+                        Affichage limité aux ${displayLimit} premières prédictions sur ${result.predictions.length} total.
+                        Exportez les résultats pour voir toutes les prédictions.
+                    </div>
+                `;
+            }
+            
+            // Afficher les statistiques NDVI
+            if (result.statistics) {
+                displayNDVIStatistics(result.statistics);
+            }
+            
+            // Afficher les recommandations
+            if (result.recommendations) {
+                displayRecommendations(result.recommendations);
+            }
+        }
+
+        // Afficher les statistiques NDVI
+        function displayNDVIStatistics(statistics) {
+            const container = document.getElementById('statisticsContainer');
+            container.innerHTML = `
+                <div class="statistics-card">
+                    <h3>📊 Statistiques NDVI 2025</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${statistics.total_rows}</div>
+                            <div class="stat-label">Points analysés</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${statistics.average_ndvi.toFixed(4)}</div>
+                            <div class="stat-label">NDVI moyen</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${statistics.min_ndvi.toFixed(4)}</div>
+                            <div class="stat-label">NDVI minimum</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${statistics.max_ndvi.toFixed(4)}</div>
+                            <div class="stat-label">NDVI maximum</div>
+                        </div>
+                    </div>
+                    ${statistics.class_distribution ? `
+                        <h4 style="margin-top: 15px;">Distribution des statuts de santé:</h4>
+                        <div class="stat-grid">
+                            ${Object.entries(statistics.class_distribution).map(([status, count]) => `
+                                <div class="stat-item">
+                                    <div class="stat-value">${count}</div>
+                                    <div class="stat-label">${status}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Afficher les prédictions en batch (Classification)
         function displayBatchPredictions(result) {
             const resultsSection = document.getElementById('resultsSection');
             resultsSection.style.display = 'block';
             
-            // Afficher toutes les prédictions
             const predictionsContainer = document.getElementById('predictionsContainer');
             predictionsContainer.innerHTML = '<h3 style="color: #2e7d32;">Prédictions individuelles:</h3>';
             
-            // Limiter l'affichage aux 100 premières prédictions pour la performance
             const displayLimit = Math.min(result.predictions.length, 100);
             const predictionsToShow = result.predictions.slice(0, displayLimit);
             
@@ -831,23 +1385,21 @@
                 `;
             }
             
-            // Afficher les statistiques
             if (result.statistics) {
                 displayStatistics(result.statistics);
             }
             
-            // Afficher les recommandations
             if (result.recommendations) {
                 displayRecommendations(result.recommendations);
             }
         }
 
-        // Afficher les statistiques
+        // Afficher les statistiques (Classification)
         function displayStatistics(statistics) {
             const container = document.getElementById('statisticsContainer');
             container.innerHTML = `
                 <div class="statistics-card">
-                    <h3>📊 Statistiques</h3>
+                    <h3>Statistiques</h3>
                     <div class="stat-grid">
                         <div class="stat-item">
                             <div class="stat-value">${statistics.total_rows}</div>
@@ -884,7 +1436,7 @@
             const container = document.getElementById('recommendationsContainer');
             container.innerHTML = `
                 <div class="recommendations">
-                    <h3>💡 Recommandations</h3>
+                    <h3>Recommandations</h3>
                     <ul>
                         ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
                     </ul>
@@ -895,7 +1447,7 @@
         // Télécharger le template
         async function downloadTemplate() {
             try {
-                window.location.href = `${API_URL}/model/template/download`;
+                window.location.href = `${API_URL}/model/template/download?type=${currentModelType}`;
                 showAlert('Téléchargement du template en cours...', 'info');
             } catch (error) {
                 console.error('Erreur:', error);
@@ -918,7 +1470,8 @@
                     },
                     body: JSON.stringify({
                         predictions: currentPredictions,
-                        format: format
+                        format: format,
+                        model_type: currentModelType
                     })
                 });
 
@@ -928,7 +1481,7 @@
                     const a = document.createElement('a');
                     a.style.display = 'none';
                     a.href = url;
-                    a.download = `predictions.${format}`;
+                    a.download = `${currentModelType}_predictions.${format}`;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
@@ -997,7 +1550,7 @@
             }
         });
 
-        // Rafraîchir le statut toutes les 30 secondes
+        // RafraÃ®chir le statut toutes les 30 secondes
         setInterval(checkServerStatus, 30000);
     </script>
 </body>
